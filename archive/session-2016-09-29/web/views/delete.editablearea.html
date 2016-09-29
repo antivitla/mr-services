@@ -1,0 +1,103 @@
+<link rel="import" href="../utils/utils.html">
+<!-- <link rel="import" href="../events/events.html"> -->
+<link rel="import" href="../vendors/vendors.html">
+<link rel="import" href="views.html">
+<script>
+  views.editablearea = function (options) {
+    var options = options || {};
+    options.placeholder = options.placeholder || "Фиксируй";
+    options.selector = options.selector || "div.editablearea";
+    options.getModel = options.getModel || function (model) { return model; };
+    options.actions = options.actions || {
+      oninput: events.Keys.CONTENT_EDIT,
+      onsubmit: events.Keys.CONTENT_SUBMIT,
+    };
+
+    // Create Actions
+
+    options.oninput = options.oninput || function (event) {
+      content[content.type] = this.value;
+      events.Action.onNext({
+        type: options.actions.oninput,
+        payload: content
+      });
+    };
+
+    options.onkeyup = options.onkeyup || function (event) {
+      if (utils.Shortcut["ctrl+enter"](event)) {
+        events.Action.onNext({
+          type: options.actions.onsubmit,
+          payload: content
+        });
+      }
+    }
+
+    // model
+
+    var content = {type: "content", content: ""};
+
+    events.Model.subscribe(function (model) {
+      content = options.getModel(model).toJS();
+    });
+
+    // View
+
+    return {
+      renderMaquette: function () {
+        return vendors.maquette.h(options.selector,
+          [
+            vendors.maquette.h("div.textarea", utils.text2maquette(content[content.type])),
+            vendors.maquette.h("textarea",
+              {
+                value: content[content.type],
+                spellcheck: false,
+                placeholder: options.placeholder,
+                oninput: options.oninput,
+                onkeyup: options.onkeyup,
+              })
+          ]);
+      }
+    }
+  }
+</script>
+
+<style>
+  .editablearea {
+    position: relative;
+    min-height: 1.5rem;
+    display: block;
+    width: 100%;
+    max-width: 45em;
+  }
+
+  .editablearea .textarea {
+    color: transparent;
+    z-index: 1;
+    position: relative;
+  }
+
+  .editablearea .textarea,
+  .editablearea textarea {
+    border: 0;
+    outline: 0;
+    padding: 0;
+    box-sizing: border-box;
+    resize: none;
+    width: 100%;
+    display: block;
+    background-color: transparent;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  .editablearea textarea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow: hidden;
+    display: block;
+    z-index: 2;
+  }
+</style>

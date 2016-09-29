@@ -1,0 +1,32 @@
+  tree.packed {
+    cursor: pointer;
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  tree tree > * {
+    /*min-width: 15em;*/
+    display: block;
+    margin: 1rem auto;
+    max-width: 45em;
+    width: 100%;
+  }
+
+  tree tree > content {
+    font-size: smaller;
+    opacity: 0.5;
+  }
+
+  tree context.action {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  tree draft div  {
+    display: block;
+    font-size: medium;
+    opacity: 0.75;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }

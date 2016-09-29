@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="assets/desk.css">
+<link rel="import" href="modules/import-notes.html">
+
+<desk class="import-notes"></desk>
+
+<!-- <debug>
+  <events class="import-notes">
+    <pre class="action">import events</pre>
+    <pre class="model">import model</pre>
+  </events>
+</debug> -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var importNotesApp = modules.importNotes("/workspace/blur").createStandalone();
+    importNotesApp.start(document.querySelector("desk.import-notes"));
+
+    // importNotesApp.events.Action.subscribe(function (action) {
+    //   document.querySelector("debug events.import-notes pre.action")
+    //     .innerHTML = "Action: " + JSON.stringify(action, null, 2);
+    //     // console.log("action:", action.type);
+    // });
+    // importNotesApp.events.Model.subscribe(function (model) {
+    //   document.querySelector("debug events.import-notes pre.model")
+    //     .innerHTML = "Model: " + JSON.stringify(model, null, 2);
+    //     // console.log("model:", model.notes.length);
+    // });
+  });
+</script>
+
+<!-- <div id="qunit"></div>
+<div id="qunit-mixture"></div>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.0.css">
+<script src="https://code.jquery.com/qunit/qunit-2.0.0.js"></script>
+<script>
+  QUnit.test("no errors", function(assert) {
+    assert.ok(true == true);
+  });
+</script> -->

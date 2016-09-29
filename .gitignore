@@ -1,2 +1,3 @@
-*/node_*/*
-*/bower*/*
+**/node_*
+**/bower_*
+**/jspm_*

@@ -1,0 +1,41 @@
+textarea {
+    box-sizing: border-box;
+    border: solid rgba(0,0,0,0.1) 1px;
+    width: 100%;
+    border-radius: 3px;
+    font-family: monospace;
+    display: block;
+    line-height: 1.5;
+    padding: 0 5px;
+    height: 100%;
+    outline: none;
+    font-size: x-large;
+    background-color: white;
+    position: relative;
+    z-index: 1;
+    transition: opacity 1.0s;
+    opacity: 1;
+    visibility: visible;
+}
+
+textarea.uninitialized {
+    opacity: 0;
+    visibility: hidden;
+}
+
+preloader {
+    background: url(http://mr-woodman.ru/timer/images/cat-preloader.gif) no-repeat center center;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 200px;
+    height: 70px;
+    margin-left: -100px;
+    margin-top: -35px;
+    transition: all 0.4s;
+    opacity: 1;
+    font-size: x-large;
+    text-align: center;
+    z-index: 0;
+}

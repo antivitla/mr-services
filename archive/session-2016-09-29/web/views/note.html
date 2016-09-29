@@ -1,0 +1,133 @@
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../events/events.html">
+<link rel="import" href="../utils/all.html">
+<link rel="import" href="../models/note.html">
+<link rel="stylesheet" href="../assets/note.css">
+<script>
+  var views = views || {};
+  views.note = function (options) {
+    var options = Object.assign({
+      getModel: function (state) {
+        return state.blur[state.focus];
+      },
+      getDictionary: function (state) {
+        return state.blur;
+      },
+      initialModel: null,
+      events: new Events(),
+      projector: null,
+      placeholder: "Напиши что-нибудь..",
+      rotate: 0,
+      appearance: "none",
+      mode: "edit",
+    }, options);
+
+    var model$ = options.events.Model;
+    var action$ = options.events.Action;
+    var EDIT = options.events.Keys.NOTE_EDIT;
+    var SUBMIT = options.events.Keys.NOTE_SUBMIT;
+
+    // model
+
+    var note = options.initialModel || models.samples.note;
+
+    model$.subscribe(function (state) {
+      var newNote = options.getModel(state).toJS ? options.getModel(state).toJS() : options.getModel(state);
+      if (JSON.stringify(newNote) != JSON.stringify(note)) {
+        note = newNote;
+      }
+
+    });
+
+    // view
+
+    function handleInput (event) {
+      note.content = this.value;
+      action$.onNext({
+        type: EDIT,
+        payload: Object.assign({}, note, {content: this.value})
+      });
+      autosize(this);
+    };
+
+    function handleSubmit (event) {
+      if (utils.Shortcut["ctrl+enter"](event)) {
+        action$.onNext({
+          type: SUBMIT,
+          payload: Object.assign({}, note)
+        });
+      }
+    }
+
+    function autosize (dom) {
+      dom.style.height = "";
+      // setTimeout(function () {
+        if (dom.scrollHeight > dom.getBoundingClientRect().height) {
+          dom.style.height = dom.scrollHeight + "px";
+        }
+      // },100);
+    }
+
+    var initiallyAutosized = false;
+    function initiallyAutosize (vnode) {
+      var i = setInterval(function () {
+        if (vnode[0].domNode) {
+          clearInterval(i);
+          initiallyAutosized = true;
+          autosize(vnode[0].domNode);
+        }
+      }, 50);
+    }
+
+    function editModeMaquette () {
+      return [
+        // vendors.maquette.h("div.textarea", utils.text2maquette(note.content)),
+        vendors.maquette.h("textarea", {
+          placeholder: options.placeholder,
+          value: note.content,
+          oninput: handleInput,
+          onkeyup: handleSubmit,
+          spellcheck: false,
+        })
+      ];
+    }
+
+    function viewModeMaquette () {
+      return [
+        vendors.maquette.h("div.textarea", utils.text2maquette(note.content, "markdown"))
+      ];
+    }
+
+    return {
+      renderMaquette: function () {
+        // hack to get real dom to autosize textarea
+        var emm = editModeMaquette();
+        if (options.mode == "edit") {
+          if (!initiallyAutosized) {
+            initiallyAutosize(emm);
+            window.addEventListener("resize", function() {
+              if (emm[0].domNode) {
+                autosize(emm[0].domNode);
+              }
+            });
+          }
+        }
+        // render
+        return vendors.maquette.h("note", {
+            styles: {
+              transform: "rotate("+options.rotate+"deg)"
+            },
+            classes: {
+              paper: options.appearance == "paper",
+              journal: options.appearance == "journal",
+              edit: options.mode == "edit",
+              view: options.mode == "view"
+            },
+            key: note,
+            "data-storage-id": note.key,
+          },
+          [options.mode == "edit" ? emm : viewModeMaquette()]);
+      }
+    };
+  };
+</script>

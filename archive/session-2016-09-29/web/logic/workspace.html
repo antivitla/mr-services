@@ -1,0 +1,32 @@
+<link rel="import" href="../storage/storage.html">
+<script>
+    var logic = logic || {};
+    logic.workspace = function (options) {
+      var options =  Object.assign({
+        getPivotedModel: function (state) {
+            return state.pivot().blur[state.focus];
+        },
+        getPivotedWorkspace: function (state) {
+          return state.pivot();
+        },
+        events: null,
+      }, options);
+
+      var action$ = options.events.Action;
+      var intent$ = options.events.Intent;
+      var CREATE_NEW_ITEM = options.events.Keys.CREATE_NEW_ITEM;
+      var CREATE_NEW_WORKSPACE = options.events.Keys.CREATE_NEW_WORKSPACE;
+
+      action$
+        .filter(function (action) {
+          return (
+            action.type == CREATE_NEW_ITEM &&
+            action.payload.type == "workspace"
+          );
+        })
+        .subscribe(function (action) {
+          console.log("Workspace Logik got NEW WORKSPACE action", action.payload);
+        });
+
+    };
+</script>

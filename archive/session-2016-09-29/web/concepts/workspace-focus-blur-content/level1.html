@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../textarea.css">
+
+<style>
+  textarea {
+    height: 50vh;
+  }
+</style>
+
+<textarea placeholder="Пиши - не пиши, всё одно.."></textarea>
+
+<list></list>
+
+<script>
+  var textarea = document.querySelector("textarea");
+  textarea.addEventListener("change", function () {
+    var note = document.createElement("note");
+    note.innerHTML = this.value;
+    document.querySelector("list").appendChild(note);
+  });
+</script>

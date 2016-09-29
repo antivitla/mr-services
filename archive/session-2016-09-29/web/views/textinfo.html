@@ -1,0 +1,47 @@
+<link rel="import" href="../utils/plural.html">
+<link rel="import" href="../utils/textinfo.html">
+<script>
+  views.textinfo = function (text) {
+    function words (text) {
+      var count = utils.words(text);
+      if (count) {
+        return count + " " + utils.plural({
+          number: count,
+          form: {
+            single: "слово",
+            few: "слова",
+            many: "слов"
+          }
+        });
+      }
+      else {
+        return "";
+      }
+    }
+
+    function letters (text) {
+      var count = utils.letters(text);
+      if (count) {
+        return count + " " + utils.plural({
+          number: count,
+          form: {
+            single: "буква",
+            few: "буквы",
+            many: "букв"
+          }
+        });
+      } else {
+        return "";
+      }
+    }
+
+    return {
+      renderMaquette: function () {
+        return vendors.maquette.h(
+          "textinfo",
+          [text ? words(text) + ", " + letters(text) + ", 0 cмысла" : ""]
+        );
+      }
+    };
+  };
+</script>

@@ -1,0 +1,86 @@
+<link rel="stylesheet" href="assets/desk.css">
+<link rel="import" href="events/events.html">
+<link rel="import" href="vendors/vendors.html">
+<link rel="import" href="views/views.html">
+<link rel="import" href="views/journal.html">
+<link rel="import" href="modules/modules.html">
+<link rel="import" href="storage/storage.html">
+
+
+<desk></desk>
+
+<script>
+  var modules = modules || {};
+
+  modules.app = function () {
+    var app = {
+      blur: {
+        "initial": {
+          type: "content",
+          content: "Initial Content",
+          key: "initial"
+        },
+        "myjournal": {
+          type: "journal",
+          journal: ["initial", "2", "1"],
+          focus: "new",
+          mode: "add",
+          key: "myjournal",
+        },
+        "1": {
+          type: "commit",
+          commit: "The Commit",
+          key: "1"
+        },
+        "2": {
+          type: "commit",
+          commit: "The Commit II",
+          key: "2"
+        },
+        "new": {
+          type: "commit",
+          commit: "",
+          key: "new"
+        }
+      },
+      focus: "myjournal"
+    };
+
+    var journal = views.journal({
+      getModel: function (model) {
+        return model.blur["myjournal"];
+      },
+
+    });
+
+    return {
+      start: function () {
+        // bootstrap events & model change
+        events.bootstrap({
+          state: (new Freezer(app)).get()
+        });
+        events.Model.subscribe(function (model) {
+          app = model.toJS();
+        })
+        // bootstrap views
+        views.bootstrap({
+          dom: document.querySelector("desk"),
+          renderMaquette: journal.renderMaquette,
+        });
+      }
+    };
+  }();
+
+  document.addEventListener("DOMContentLoaded", function () {
+    modules.app.start();
+  });
+
+  events.Action.subscribe(function (action) {
+    console.log("%cAction: " + JSON.stringify(action, null, 2), "color: olive");
+  });
+
+  events.Model.subscribe(function (model) {
+    console.log("%cModel: " + JSON.stringify(model.blur[model.focus], null, 2), "color: gray");
+  });
+
+</script>

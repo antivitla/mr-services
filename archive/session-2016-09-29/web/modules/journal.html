@@ -1,0 +1,20 @@
+<link rel="import" href="../logic/journal.html">
+<link rel="import" href="../views/journal.html">
+<link rel="import" href="../models/journal.html">
+<link rel="import" href="standalone.html">
+<script>
+  var modules = modules || {};
+  modules.journal = function (options) {
+    return {
+      createStandalone: function (options) {
+        return modules.createStandalone({
+          model: models.samples.journal_workspace,
+          logic: logic.journal,
+          logicOptions: {},
+          view: views.journal,
+          viewOptions: {},
+        });
+      }
+    };
+  };
+</script>

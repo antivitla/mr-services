@@ -1,0 +1,74 @@
+<script>
+  var logic = logic || {};
+  logic.tree = function (options) {
+    var options = Object.assign({
+      getPivotedModel: function (state) {
+          return state.pivot().blur[state.focus];
+      },
+      getPivotedWorkspace: function (state) {
+        return state.pivot();
+      },
+      events: null,
+    }, options);
+
+    var path = [];
+    var action$ = options.events.Action;
+    var intent$ = options.events.Intent;
+    var CONTEXT_SWITCH = options.events.Keys.TREE_CONTEXT_SWITCH;
+    var BACK = options.events.Keys.TREE_BACK;
+
+    action$.filter(function(action) {
+      return action.type == CONTEXT_SWITCH && action.payload != BACK;
+    }).subscribe(function (action) {
+      intent$.onNext(function (state) {
+        // if it was first node, remember initial node
+        if (!path.length) {
+          path.push(state.focus);
+        }
+        // remember node that we switching to
+        path.push(action.payload);
+        // switch context by setting new focus
+        return state.pivot().set("focus", action.payload);
+      });
+    });
+
+    action$.filter(function (action) {
+      return action.type == CONTEXT_SWITCH && action.payload == BACK;
+    }).subscribe(function (action) {
+      intent$.onNext(function (state) {
+        // if we are not at root, go up
+        if (path.length > 1) {
+          path.pop();
+          return state.pivot().set("focus", path.slice(-1)[0])
+        }
+        // or, if we are root, just stay cool and do nothing
+        else {
+          return state;
+        }
+      });
+    });
+
+
+    // events.Action.subscribe(function (action) {
+    //   switch(action.type) {
+    //     case events.Keys.TREE_CONTEXT_SWITCH:
+    //       if (action.payload != events.Keys.BACK) {
+    //         events.Intent.onNext(function (state) {
+    //           path.push(action.payload);
+    //           return state.pivot().set("focus", action.payload);
+    //         });
+    //       } else {
+    //         events.Intent.onNext(function (state) {
+    //           if (path.length > 1) {
+    //             path.pop();
+    //             return state.pivot().set("focus", path[path.length - 1]);
+    //           } else {
+    //             return state;
+    //           }
+    //         });
+    //       }
+    //       break;
+    //   }
+    // });
+  };
+</script>

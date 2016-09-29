@@ -1,0 +1,156 @@
+<link rel="stylesheet" href="../textarea.css">
+<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.js"></script>
+
+<style>
+  textarea {
+    height: 20vh;
+  }
+</style>
+
+<workspace>
+  <focus></focus>
+  <blur></blur>
+</workspace>
+
+<script>
+
+  function Content (content) {
+    // if (!content) {
+    //   console.warn("content seems to be empty: ", content);
+    // }
+    this.content = content;
+  }
+
+  // function ContentBuffer (content) {
+  //   Content.call(this, content ? [content] : []);
+  // }
+
+  // ContentBuffer.prototype.pull = function (key) {
+  //   if (this.content.length > key + 1) {
+  //     console.warn("key seems invalid");
+  //   }
+  //   if (!this.content[key]) {
+  //     console.warn("content at key seems empty");
+  //   }
+  //   return this.content.splice(key, 1)[0];
+  // }
+
+  // ContentBuffer.prototype.push = function (content) {
+  //   if (!content) {
+  //     console.warn("content seems empty:", content);
+  //   }
+  //   return this.content.push(content);
+  // }
+
+
+  function Focus () {
+    Content.call(this)
+    // console.log(content);
+    // ContentBuffer.call(this, content);
+  }
+
+  Focus.prototype = Object.create(ContentBuffer.prototype);
+
+  Focus.prototype.clear = function () {
+    return this.pull(0);
+  };
+
+  Focus.prototype.set = function (content) {
+    return this.push(content);
+  };
+
+  Focus.prototype.push = function (content) {
+    ContentBuffer.prototype.push.call(this, content);
+    if (this.content.length > 1) {
+      return this.content.shift();
+    }
+  };
+
+
+
+  function Blur () {
+    // ContentBuffer.call(this);
+  }
+
+  Blur.prototype = Object.create(ContentBuffer.prototype);
+
+
+
+  function Workspace (content) {
+    this.focus = content;
+    // console.log(this.focus);
+    this.blur = [];
+
+    // this.focus.blur = this.blurFocused.bind(this);
+    // this.blur.focus = this.focusBlurred.bind(this);
+  }
+
+  // Workspace.prototype.blurFocused = function () {
+  //   // console.log(this.blur, this.focus, this);
+  //   this.blur.push(this.focus.clear());
+  //   console.log(this.focus.content, this.blur.content);
+  // }
+
+  // Workspace.prototype.focusBlurred = function (key) {
+  //   // this.blurFocused();
+  //   this.focus.push(this.blur.pull(key));
+  //   console.log(this.focus.content, this.blur.content);
+  // }
+
+  Workspace.prototype.add = function (content) {
+    if (this.focus.content) {
+      this.blur.content.push(this.focus.content);
+    }
+    this.blur.push(this.focus)
+    this.blur.push(this.focus.push(content));
+  }
+
+  // Initialize Firebase
+  firebase.initializeApp({
+    apiKey: "AIzaSyCTiZnCVDPfjk35xCIUCWpiQXjBs3p4HDY",
+    authDomain: "brilliant-fire-1299.firebaseapp.com",
+    databaseURL: "https://brilliant-fire-1299.firebaseio.com",
+    // storageBucket: "brilliant-fire-1299.appspot.com",
+  });
+
+  // var contentStream = new Rx.ReplaySubject(1);
+
+  // contentStream.onNext(1);
+  // contentStream.onNext(4);
+
+  // setTimeout(function () {
+  //   contentStream.onNext(100);
+  // },100);
+
+  // setTimeout(function () {
+  //   contentStream.onNext(200);
+  // },200);
+
+  // setTimeout(function () {
+  //   contentStream.onNext(300);
+  // },300);
+
+  // contentStream.subscribe(function (content) {
+  //   console.log("content", content);
+  // });
+
+  var content = new Content("Hello, world");
+
+  var workspace = new Workspace(content);
+
+  workspace.add(new Content("Another thing"));
+  workspace.remove(content)
+  // workspace.blur.add(new Content("Stuff"));
+  // workspace.focus.add(new Content("Some other for focus"));
+  // workspace.focus.set(content)
+  // workspace.focus("some stuff")
+  // timer.ui.focus(task);
+  // notes.ui.blur(note);
+
+
+
+
+
+</script>
+

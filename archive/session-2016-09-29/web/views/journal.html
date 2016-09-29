@@ -1,0 +1,109 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../vendors/rx.html">
+<link rel="import" href="../utils/all.html">
+<link rel="import" href="../models/journal.html">
+<link rel="import" href="../models/list.html">
+<link rel="import" href="../views/noteView.html">
+<link rel="import" href="../views/note.html">
+<link rel="import" href="../views/list.html">
+<link rel="import" href="../storage/storage.html">
+<link rel="stylesheet" href="../assets/journal.css">
+
+<script>
+  var views = views || {};
+  views.journal = function (options) {
+    var options = Object.assign({
+      getModel: function (state) {
+        return state.blur[state.focus];
+      },
+      // getDictionary: function (state) {
+      //   return state.blur;
+      // },
+      events: null,
+      projector: null,
+    }, options);
+
+    var model$ = options.events.Model;
+    var action$ = options.events.Action;
+    var intent$ = options.events.Intent;
+
+    // model
+
+    var journal = models.samples.list;
+    // var dictionary = models.samples.journal_dictionary;
+    var notes = vendors.maquette.createMapping(
+      function getSourceKey (source) {
+        return source.key;
+      },
+      function createTarget(source) {
+        return views.note({initialModel: source, appearance: "journal", mode: "view"});
+      },
+      function updateTarget (updatedSource, target) {
+        // console.log("update target", updatedSource, target);
+      }
+    );
+
+    model$.subscribe(function (state) {
+      journal = options.getModel(state).toJS();
+      // dictionary = options.getDictionary(state).toJS();
+    });
+
+    // debug
+
+    var list = [{
+      content:`The simplest way to delete data is to call remove()`,
+      key:"c1"
+    },{
+      content:`You can also delete by specifying null as the value for another write operation such as set() or update(). You can use this technique with update() to delete multiple children in a single API call.`,
+      key:"c2"
+    }];
+    var note$ = new vendors.Rx.ReplaySubject(1);
+
+    notes.map(list);
+
+    function lastYear () {
+      var now = new Date();
+      return (new Date(now.getFullYear(), 0, 1)).getTime();
+    }
+
+    function lastMonth () {
+      var now = new Date();
+      return (new Date(now.getFullYear(), now.getMonth(), 1)).getTime();
+    }
+
+    storage.focus.content
+      .ref("/workspace/blur")
+      .orderByChild("created_at")
+      .startAt(lastMonth())
+      .on("value", function (snapshot) {
+        intent$.onNext(function (state) {
+          console.log(state.blur[state.focus]);
+          return state.pivot()
+            .blur[state.focus].items.set(snapshot.val());
+        });
+      });
+
+    note$.subscribe(function (note) {
+      // list.push(note);
+      notes.map(list.slice(0));
+      options.projector.scheduleRender();
+    });
+
+    // var uiList = views.list({
+    //   events: options.events,
+    //   // getModel: function (state) { return state.blur[state.blur[state.focus].list]; }
+    // });
+
+
+    return {
+      renderMaquette: function () {
+        var h = vendors.maquette.h;
+        return h("journal", [
+          h("notes", notes.results.map(function (item) { return item.renderMaquette(); })),
+          // uiList.renderMaquette(),
+        ]);
+      },
+    }
+  }
+</script>

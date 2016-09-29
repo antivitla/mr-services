@@ -1,0 +1,49 @@
+<link rel="import" href="standalone.html">
+<link rel="import" href="../views/workspace.html">
+
+<script>
+  var modules = modules || {};
+  modules.app = function () {
+    return {
+      createStandalone: function () {
+        var events = new Events();
+        // 1. insert workspace (or other stuff)
+
+        // 2. create popups (overlays)
+        // 3. maybe router
+
+        // Maybe move something to app api
+        // (besides .createStandalone())
+
+        return modules.createStandalone({
+          model: models.samples.workspace_workspace,
+          events: events,
+          type: "app",
+          logic: function (options) {
+            //
+          },
+          view: function (options) {
+
+            var uiViewItem = views.workspace({
+              events: options.events
+            });
+
+            var uiCreateItem = views.createWorkspace({
+              events: options.events
+            });
+
+            return {
+              renderMaquette: function () {
+                var h = vendors.maquette.h;
+                return h("app", [
+                  uiItem.renderMaquette()
+                ]);
+              }
+            }
+          },
+        });
+
+      }
+    }
+  };
+</script>

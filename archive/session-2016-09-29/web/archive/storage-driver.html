@@ -1,0 +1,27 @@
+<link rel="import" href="lib/rx.html">
+<script>
+  function storageDriver (key) {
+    var write$ = new Rx.Subject();
+    write$
+      .distinctUntilChanged()
+      .debounce(1000)
+      .subscribe(value => {
+        localStorage.setItem(key, value);
+      });
+
+    return {
+      write: function (value) {
+        setTimeout(function () {
+          write$.onNext(value);
+        });
+      },
+      read: function () {
+        var request$ = new Rx.ReplaySubject(1);
+        setTimeout(() => {
+          request$.onNext(localStorage.getItem(key))
+        }, 400);
+        return request$;
+      }
+    };
+  }
+</script>

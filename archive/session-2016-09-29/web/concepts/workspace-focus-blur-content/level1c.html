@@ -1,0 +1,51 @@
+<link rel="stylesheet" href="../textarea.css">
+<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+
+<style>
+  textarea {
+    height: 20vh;
+  }
+</style>
+
+<workspace>
+  <focus></focus>
+  <blur></blur>
+</workspace>
+
+<script>
+
+  // Initialize Firebase
+  firebase.initializeApp({
+    apiKey: "AIzaSyCTiZnCVDPfjk35xCIUCWpiQXjBs3p4HDY",
+    authDomain: "brilliant-fire-1299.firebaseapp.com",
+    databaseURL: "https://brilliant-fire-1299.firebaseio.com",
+    // storageBucket: "brilliant-fire-1299.appspot.com",
+  });
+
+
+  var note = {
+    text: "Hello, world!"
+  };
+
+  var archive = []; // (blur) push, pop
+
+  var focus = note;
+
+  var storage = firebase.database();
+
+
+  var scene1 = {
+    focus: "",
+    blur: ""
+  }
+
+
+
+
+
+
+
+
+
+</script>
+

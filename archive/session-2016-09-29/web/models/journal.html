@@ -1,0 +1,18 @@
+
+<script>
+  var models = models || {samples: {}};
+
+  models.samples.journal = {
+    type: "journal", key: "journalid1",
+    content: "Журнальчик мой",
+  };
+
+  models.samples.journal_dictionary = {
+    journalid1: models.samples.journal
+  };
+
+  models.samples.journal_workspace = {
+    blur: models.samples.journal_dictionary,
+    focus: "journalid1"
+  };
+</script>

@@ -1,0 +1,138 @@
+<link rel="stylesheet" href="assets/desk.css">
+<link rel="import" href="modules/note.html">
+<link rel="import" href="modules/journal.html">
+<link rel="import" href="modules/tree.html">
+
+<desk class="journal" style="min-height: 50vh;"></desk>
+
+<debug>
+  <events class="note">
+    <pre class="action">note events</pre>
+    <pre class="model">note model</pre>
+  </events>
+  <events class="journal">
+    <pre class="action">journal events</pre>
+    <pre class="model">journal model</pre>
+  </events>
+  <events class="tree">
+    <pre class="action">tree events</pre>
+    <pre class="model">tree model</pre>
+  </events>
+</debug>
+<style>
+  debug {
+    display: flex;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  debug events {
+    width: 33%;
+    display: block;
+    box-sizing: border-box;
+    padding: 1rem;
+    overflow-x: hidden;
+  }
+
+  debug events pre {
+    display: block;
+    font-size: medium;
+    line-height: 1rem;
+  }
+
+  debug events pre + pre {
+    margin-top: 1rem;
+  }
+
+  debug events + events {
+    border-left: solid lightgrey 1px;
+  }
+
+  debug .note .action {
+    color: brown;
+  }
+
+  debug .note .model {
+    color: darkcyan;
+  }
+
+  debug .journal .action {
+    color: crimson;
+  }
+
+  debug .journal .model {
+    color: steelblue;
+  }
+
+  debug .tree .action {
+    color: yellowgreen;
+  }
+
+  debug .tree .model {
+    color: slategrey;
+  }
+</style>
+
+
+<desk class="note" style="min-height: 30vh;"></desk>
+
+<desk class="tree" style="min-height: 30vh;"></desk>
+<style>
+  desk + desk {
+    border-top: solid lightgrey 1px;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var noteApp = modules.note().createStandalone();
+    noteApp.start(document.querySelector("desk.note"));
+    noteApp.events.Action.subscribe(function (action) {
+      document.querySelector("debug events.note pre.action")
+        .innerHTML = "Action: " + JSON.stringify(action, null, 2);
+      // console.log("%cNote Action: " + JSON.stringify(action, null, 2), "color: orangered");
+    });
+    noteApp.events.Model.subscribe(function (model) {
+      document.querySelector("debug events.note pre.model")
+        .innerHTML = "Model: " + JSON.stringify(model, null, 2);
+      // console.log("%cNote Model: " + JSON.stringify(model.blur[model.focus], null, 2), "color: gray");
+    });
+
+    var journalApp = modules.journal().createStandalone();
+    journalApp.start(document.querySelector("desk.journal"));
+    journalApp.events.Action.subscribe(function (action) {
+      document.querySelector("debug events.journal pre.action")
+        .innerHTML = "Action: " + JSON.stringify(action, null, 2);
+      // console.log("%cJournal Action: " + JSON.stringify(action, null, 2), "color: firebrick");
+    });
+    journalApp.events.Model.subscribe(function (model) {
+      document.querySelector("debug events.journal pre.model")
+        .innerHTML = "Model: " + JSON.stringify(model, null, 2);
+      // console.log("%cJournal Model: " + JSON.stringify(model.blur[model.focus], null, 2), "color: yellow");
+    });
+
+    var treeApp = modules.tree().createStandalone();
+    treeApp.start(document.querySelector("desk.tree"));
+    treeApp.events.Action.subscribe(function (action) {
+      document.querySelector("debug events.tree pre.action")
+        .innerHTML = "Action: " + JSON.stringify(action, null, 2);
+      console.log("%cTree Action: " + JSON.stringify(action, null, 2), "color: yellowgreen");
+    });
+    treeApp.events.Model.subscribe(function (model) {
+      document.querySelector("debug events.tree pre.model")
+        .innerHTML = "Model: " + JSON.stringify(model.blur[model.focus], null, 2);
+      // console.log("%cTree Model: " + JSON.stringify(model.blur[model.focus], null, 2), "color: skyblue");
+    });
+
+  });
+</script>
+
+<!-- <div id="qunit"></div>
+<div id="qunit-mixture"></div>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.0.css">
+<script src="https://code.jquery.com/qunit/qunit-2.0.0.js"></script>
+<script>
+  QUnit.test("no errors", function(assert) {
+    assert.ok(true == true);
+  });
+</script> -->

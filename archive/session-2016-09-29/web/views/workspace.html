@@ -1,0 +1,68 @@
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../models/workspace.html">
+<!-- <link rel="import" href="../assets/icons.html"> -->
+<script>
+  var views = views || {};
+  views.workspace = function (options) {
+    var options = Object.assign({
+      getModel: function (state) {
+        console.log(state);
+        return state.blur[state.focus];
+      },
+      getDictionary: function (state) {
+        return state.blur;
+      },
+      initialModel: null,
+      events: null,
+      projector: null,
+    }, options);
+
+    var model$ = options.events.Model;
+    var action$ = options.events.Action;
+    var CREATE_NEW_ITEM = options.events.Keys.CREATE_NEW_ITEM;
+    var workspace = options.initialModel || models.samples.workspace;
+    // var dictionary = models.samples.workspace_dictionary;
+
+    model$.subscribe(function (state) {
+      console.log(state);
+      workspace = options.getModel(state);
+      // dictionary = options.getDictionary(state);
+    });
+
+    function actionNewWorkspace (event) {
+      event.preventDefault();
+      action$.onNext({
+        type: CREATE_NEW_ITEM,
+        payload: {
+          type: "workspace"
+        }
+      });
+    }
+
+    function renderContext (w) {
+      var h = vendors.maquette.h;
+      return [h("context.top.left", [w.content])];
+    }
+
+    return {
+      renderMaquette: function () {
+        var h = vendors.maquette.h;
+        return h("workspace", [
+          h("a.action.top.right",{onclick: actionNewWorkspace}, ["New"]),
+          renderContext(workspace),
+          "workspace"
+        ]);
+      }
+    };
+  };
+</script>
+
+<style>
+  context {
+    display: block;
+    position: fixed;
+    /*line-height: 2rem;*/
+    /*font-weight: 500;*/
+    /*font-size: medium;*/
+  }
+</style>

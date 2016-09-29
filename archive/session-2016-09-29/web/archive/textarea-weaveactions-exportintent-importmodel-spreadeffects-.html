@@ -1,0 +1,184 @@
+<link rel="stylesheet" href="textarea.css">
+
+<link rel="import" href="lib/rx.html">
+<link rel="import" href="lib/virtual-dom.html">
+<link rel="import" href="lib/mr.html">
+<link rel="import" href="lib/update.html">
+<link rel="import" href="lib/shortcut.html">
+
+<link rel="import" href="storage-driver.html">
+<link rel="import" href="keys.html">
+
+<link rel="import" href="effects/log.html">
+<link rel="import" href="effects/initialize.html">
+<link rel="import" href="effects/crazycolor.html">
+
+<link rel="import" href="action.html">
+<link rel="import" href="intent.html">
+<link rel="import" href="model.html">
+
+<preloader></preloader>
+<textarea class="uninitialized"></textarea>
+<log></log>
+
+<script>
+  (function () {
+
+    //
+    // Weave actions stream from raw input effects
+    //
+    // event          event
+    //   \    event    /
+    //    \     |  ___/  event
+    //     \___ | / ______/
+    //         \|//
+    //       action
+    //       stream
+    //          |
+
+    function weaveActions (sources) {
+      const actions = [];
+
+      // load from local storage -> LOAD action
+      actions.push(sources.storage.read()
+        .map(text => ({
+          type: Keys.NOTE_LOAD,
+          payload: text
+        })));
+
+      // events from user -> EDIT action
+      actions.push(Rx.Observable
+        .merge(
+          Rx.Observable.fromEvent(sources.DOM, "change"),
+          Rx.Observable.fromEvent(sources.DOM, "keyup")
+        )
+        .map(event => event.target.value)
+        .distinctUntilChanged()
+        .map(text => ({
+          type: Keys.NOTE_EDIT,
+          payload: text
+        })));
+
+      return Rx.Observable.merge(actions);
+    };
+
+    //
+    // Export model transformations / intents
+    //
+
+    function exportIntents (intent$, action$) {
+      // const localIntent$ = new Rx.Subject();
+      action$.subscribe(action => {
+        // console.log("project intent from action", action);
+        switch(action.type) {
+          case Keys.NOTE_LOAD:
+          //   // console.log(action.type);
+          //   intent$.onNext((state) =>
+          //     updateNoteText(state, action.payload));
+          //   break;
+          case Keys.NOTE_EDIT:
+            // console.log(action.type);
+            // global
+            intent$.onNext((state) =>
+              updateNoteText(state, action.payload));
+            break;
+          default:
+            break;
+        }
+      });
+    }
+
+
+    function updateNoteText (state, payload) {
+      return update(state, {
+        $merge: {note: {text: payload}}
+      });
+    }
+
+    //
+    // Import state transformations / model
+    //
+
+    function importState (state$, sources) {
+      state$.subscribe(state => {
+        loadValueEffect(sources, state.note.value)
+      })
+    }
+
+    //
+    // Effects in response to actions
+    //
+    //          |
+    //   action & state
+    //       stream
+    //         /|\
+    //      __/ | \____
+    //     /  effect   \
+    // effect           \
+    //                effect
+    //
+
+    function spreadEffects (sources, action$) {
+      // loading
+      action$
+        .filter(action => action.type == Keys.NOTE_LOAD)
+        .subscribe(action => {
+          loadValueEffect(sources, action.payload)
+          setTimeout(function () {
+            Effects["initialize"](sources);
+          }, 10);
+        });
+
+      // Save
+      action$
+        .filter(action => action.type == Keys.NOTE_EDIT)
+        .debounce(500)
+        .subscribe(action => {
+          saveEffect(sources, action.payload);
+        });
+
+      // // log
+      // action$.subscribe(action => {
+      //   Effects["log"](null, action);
+      // });
+    }
+
+    function loadValueEffect (sources, payload) {
+      (sources.DOM.tagName.toLowerCase() == "textarea" ?
+        sources.DOM :
+        sources.DOM.querySelector("textarea")).value = payload;
+    }
+
+    function saveEffect (sources, payload) {
+      sources.storage.write(payload);
+    }
+
+    //
+    // Component
+    //
+
+    mr.modules["textarea"] = {
+      init: function (sources) {
+        // weave actions
+        // and export them to global
+        // action stream
+        Actions.merge(weaveActions(sources))
+
+        exportIntents(Intent, action$);
+        // importState(Model, sources);
+        spreadEffects(sources, action$);
+      }
+    };
+
+  }());
+
+  //
+  // Run standalone
+  //
+
+  mr.modules["textarea"].init({
+    DOM: document.querySelector("textarea"),
+    storage: storageDriver("textarea")
+  });
+
+</script>

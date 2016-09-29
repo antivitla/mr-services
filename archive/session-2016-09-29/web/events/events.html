@@ -1,0 +1,67 @@
+<link rel="import" href="../vendors/rx.html">
+
+<script>
+  var EventsKeys = {
+
+    NOTE_EDIT: "NOTE_EDIT",
+    NOTE_SUBMIT: "NOTE_SUBMIT",
+    NOTE_EXPAND: "NOTE_EXPAND",
+
+    CONTENT_EDIT: "CONTENT_EDIT",
+    CONTENT_SUBMIT: "CONTENT_SUBMIT",
+
+    COMMIT_EDIT: "COMMIT_EDIT",
+    COMMIT_SUBMIT: "COMMIT_SUBMIT",
+
+    // TIMER_START: "TIMER_START",
+    // TIMER_STOP: "TIMER_STOP",
+
+    // FOCUS_LOAD: "FOCUS_LOAD",
+    // BLUR_LOAD: "BLUR_LOAD",
+    // INITIAL_FOCUS_LOAD: "INITIAL_FOCUS_LOAD",
+    // INITIAL_BLUR_LOAD: "INITIAL_BLUR_LOAD",
+
+    WORKSPACE_LOAD: "WORKSPACE_LOAD",
+    FLOW_LOAD: "FLOW_LOAD",
+    JOURNAL_LOAD: "JOURNAL_LOAD",
+
+    TREE_CONTEXT_SWITCH: "TREE_CONTEXT_SWITCH",
+    TREE_BACK: "TREE_BACK",
+
+    NEW_CONTENT: "NEW_CONTENT",
+    PREV_CONTENT: "PREV_CONTENT",
+
+    PROGRESS: "PROGRESS",
+
+    // CREATE_NEW_WORKSPACE: "CREATE_NEW_WORKSPACE",
+
+
+    START_APP: "START_APP",
+
+    ITEM_LOADED: "ITEM_LOADED",
+    ITEMS_LOADED: "ITEMS_LOADED",
+    CREATE_NEW_ITEM: "CREATE_NEW_ITEM",
+
+  };
+
+  function Events () {
+    this.Action = new vendors.Rx.ReplaySubject(1);
+    this.Intent = new vendors.Rx.ReplaySubject(1);
+    this.Keys = EventsKeys;
+    this.Model = this.Intent
+      .scan(function (state, intent) {
+        return intent(state);
+      }, {})
+      .publish();
+  }
+
+  Events.prototype.start = function (options) {
+    this.Intent.onNext(function () {
+      // console.log(options.state);
+      return options.state;
+    });
+    this.Model.connect();
+  }
+
+  // var events = new Events();
+</script>

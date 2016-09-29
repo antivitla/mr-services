@@ -1,0 +1,29 @@
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../views/import-notes.html">
+<!-- <link rel="import" href="../models/journal.html"> -->
+<link rel="import" href="../models/import-notes.html">
+<link rel="import" href="../logic/import-notes.html">
+<link rel="import" href="standalone.html">
+<script>
+  var modules = modules || {};
+  modules.importNotes = function (storageKey) {
+    return {
+      createStandalone: function () {
+        return modules.createStandalone({
+          events: new Events(),
+          model: models.samples.import_notes,
+          logic: logic.importNotes,
+          logicOptions: {
+            storageKey: storageKey
+          },
+          view: views.importNotes,
+          viewOptions: {
+            initialModel: Object.assign(models.samples.import_notes, {
+              storageKey: storageKey
+            })
+          }
+        });
+      }
+    };
+  };
+</script>

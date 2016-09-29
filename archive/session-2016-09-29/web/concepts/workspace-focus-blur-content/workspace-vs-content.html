@@ -1,0 +1,74 @@
+<link rel="stylesheet" href="../textarea.css">
+
+<style>
+  textarea {
+    height: 20vh;
+  }
+</style>
+
+<workspace>
+  <focus></focus>
+  <blur></blur>
+</workspace>
+
+<script>
+
+  function Content (content) {
+    this.content = content;
+  }
+
+  function Workspace (content) {
+    this.focused = [content];
+    this.blurred = this.blurred || [];
+    this.content = content;
+  }
+
+  Workspace.prototype.blur = function (item) {
+    if (item) {
+      this.blurred.push(item);
+      if (this.focused.indexOf(item) > -1) {
+        this.focused.splice(this.focused.indexOf(item), 1);
+      }
+    }
+  }
+
+  Workspace.prototype.focus = function (item) {
+    if (item) {
+      this.focused.push(item);
+      if (this.blurred.indexOf(item) > -1) {
+        this.blurred.splice(this.blurred.indexOf(item), 1)
+      }
+    }
+  }
+
+  Workspace.prototype.clear = function () {
+    while(this.focused.length > 0) this.blurred.push(this.focused.pop());
+  }
+
+  Workspace.prototype.add = function (content) {
+    this.clear();
+    this.focus(new this.content.constructor(content));
+  }
+
+  var content = new Content("zok");
+  var notespace = new Workspace(content);
+  notespace.clear();
+  var vitla = new notespace.content.constructor("Vitla");
+  notespace.focus(vitla);
+  notespace.clear();
+  var mokla = new notespace.content.constructor("Mokla");
+  notespace.focus(mokla);
+
+  var metaspace = new Workspace(notespace);
+  // metaspace.add(new Content("metaspace"));
+  metaspace.clear();
+  metaspace.add(new Content("Zaguldablin"));
+  metaspace.focused[0].add("Micronew note");
+  metaspace.focused[0].add("Another note");
+
+  var ultraspace = new Workspace(metaspace);
+
+
+
+
+</script>

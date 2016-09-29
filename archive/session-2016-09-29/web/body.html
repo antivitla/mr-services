@@ -1,0 +1,327 @@
+<link rel="import" href="lib/update.html">
+<link rel="import" href="textarea.html">
+<link rel="import" href="model.html">
+<link rel="import" href="intent.html">
+
+<style>
+  body {
+    background-color: whitesmoke;
+    /*font-size: 18px;*/
+    /*font-family: monospace;*/
+    line-height: 1.333;
+    margin: 10px;
+  }
+
+  .textarea {
+    height: calc(100% - 60px);
+    opacity: 1;
+    visibility: visible;
+    transform: translate3d(0, 0, 0) scale(1,1);
+  }
+
+  .textarea.finished {
+    transform-origin: 100% 100%;
+    opacity: 0;
+    transform: translate3d(0, 35px, 0) scale(0.01, 0.01);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+
+  .textarea.beginning {
+    transform-origin: 0% 0%;
+    transition: opacity 0.5s, transform 0.5s;
+  }
+
+
+  textarea {
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    box-sizing: border-box;
+    padding: 20px 30px;
+  }
+
+  button {
+    padding: 10px;
+    font-size: x-large;
+    font-family: monospace;
+    cursor: pointer;
+    box-sizing: border-box;
+    height: 50px;
+    width: 50px;
+    display: block;
+    border-radius: 25px;
+    box-shadow: 0px 0px 0px 5px rgba(0,0,0,0.05);
+    margin: 10px auto 0 auto;
+    outline: none;
+    background-color: #fefefe;
+  }
+
+  button icon {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: solid #aaa 2px;
+    border-radius: 10px;
+  }
+
+  button text {
+    font-size: small;
+    color: #999999;
+  }
+
+  tip {
+    font-size: small;
+    float: right;
+    height: 20px;
+    line-height: 20px;
+    margin-bottom: -20px;
+    position: relative;
+    top: 5px;
+    right: 15px;
+    z-index: 2;
+    opacity: 0.5;
+  }
+
+  shortcut {
+    font-weight: bold;
+  }
+
+  count {
+    float: left;
+    line-height: 50px;
+    margin-top: -50px;
+    font-size: x-small;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 1s;
+  }
+
+  count:before {
+    content: "notes: ";
+  }
+
+  lastnote {
+    float: right;
+    line-height: 50px;
+    margin-top: -50px;
+    font-size: small;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 1.5s;
+    width: 40%;
+    text-align: right;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  lastnote:before {
+    content: "~ ";
+    font-style: normal;
+  }
+
+  .uninitialized {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+</style>
+
+
+<body id="app">
+  <preloader></preloader>
+  <div class="textarea uninitialized">
+    <tip><shortcut>ctrl+enter</shortcut> to submit</tip>
+    <textarea></textarea>
+  </div>
+  <button><text>done</text></button>
+  <!-- <button><icon></icon></button> -->
+  <count class="uninitialized"></count>
+  <lastnote class="uninitialized"></lastnote>
+</body>
+
+<script>
+  (function () {
+
+    //
+    // Actions
+    //
+
+    function weaveActions (sources) {
+      const actions = [],
+        textarea = sources.DOM.querySelector("textarea"),
+        button = sources.DOM.querySelector("button");
+
+      actions.push(Rx.Observable
+        .fromEvent(textarea, "keydown")
+        .filter(e => Shortcut["ctrl+enter"](e))
+        .map(e => ({
+          type: Keys.NOTE_FINISH
+        })));
+
+      actions.push(Rx.Observable
+        .fromEvent(button, "click")
+        .map(() => ({
+          type: Keys.NOTE_FINISH
+        })));
+
+      actions.push(sources.storage.read()
+        .map(list => ({
+          type: Keys.NOTES_LOAD,
+          payload: (list ? (JSON.parse(list).notes ? JSON.parse(list).notes : []) : [])
+        })));
+
+      return Rx.Observable.merge(actions);
+    }
+
+    //
+    // Export intent / model transformation
+    //
+
+    function exportIntents (intent$, action$) {
+      action$.subscribe(action => {
+        switch(action.type) {
+          case Keys.NOTE_FINISH:
+            intent$.onNext((state) =>
+              putNotesToArchive(state, [state.note]));
+            intent$.onNext((state) =>
+              createNewNote(state));
+            break;
+          case Keys.NOTES_LOAD:
+            intent$.onNext((state) =>
+              initNotes(state, action.payload));
+            break;
+        }
+      })
+    }
+
+    function putNotesToArchive(state, notes) {
+      return update(state, {
+        notes: {$push: notes}
+      });
+    }
+
+    function initNotes (state, notes) {
+      return update(state, {
+        $merge: {notes: notes}
+      });
+    }
+
+    function setCurrentNote(state, note) {
+      return update(state, {
+        $merge: {note: note}
+      });
+    }
+
+    function createNewNote (state) {
+      return update(state, {
+        $merge: {note: {text: ""}}
+      });
+    }
+
+    //
+    // Import
+    //
+
+    function importState (state$, sources) {
+      state$.subscribe(state => {
+        saveEffect(sources, state);
+        if (state.notes) {
+          if (state.notes.length > 0) {
+            showCountEffect(sources, state.notes.length);
+            showLastNote(sources, state.notes[state.notes.length - 1].text);
+          }
+        }
+      })
+    }
+
+    //
+    // Effects
+    //
+
+    function spreadEffects (sources, action$) {
+      // load
+      action$.filter(action => action.type == Keys.NOTES_LOAD)
+        .subscribe(action => {
+          if (action.payload.length > 0) {
+            showCountEffect(sources, action.payload.length);
+            showLastNote(sources, action.payload[action.payload.length - 1].text);
+          }
+        });
+
+      // finish
+      action$.filter(action => action.type == Keys.NOTE_FINISH)
+        .subscribe(action => {
+          sources.DOM.querySelector(".textarea").classList.add("finished");
+          setTimeout(function () {
+            sources.DOM.querySelector("textarea").value = "";
+            sources.DOM.querySelector(".textarea").classList.add("beginning");
+            setTimeout(function () {
+              sources.DOM.querySelector(".textarea").classList.remove("finished")
+              setTimeout(function () {
+                sources.DOM.querySelector(".textarea").classList.remove("beginning")
+              }, 500)
+            }, 500)
+          }, 500)
+        });
+    }
+
+    function saveEffect (sources, payload) {
+      sources.storage.write(JSON.stringify(payload));
+    }
+
+    function showCountEffect (sources, number) {
+      let count = sources.DOM.querySelector("count");
+      Effects["initialize"]({DOM: count});
+      count.innerHTML = number;
+    }
+
+    function showLastNote (sources, text) {
+      let note = sources.DOM.querySelector("lastnote");
+      Effects["initialize"]({DOM: note});
+      note.innerHTML = text;
+    }
+
+
+    //
+    // Component
+    //
+
+    mr.modules["body"] = {
+      init: function (sources) {
+
+
+        const action$ = weaveActions(sources);
+        exportIntents(Intent, action$);
+        importState(Model, sources);
+        spreadEffects(sources, action$);
+
+        // submodules
+        mr.modules["textarea"].init({
+          DOM: document.querySelector(".textarea"),
+          storage: storageDriver("textarea")
+        });
+      }
+    };
+
+  }());
+
+  //
+  // Run standalone
+  //
+
+  mr.modules["body"].init({
+    DOM: document.querySelector("body"),
+    storage: storageDriver("body")
+  });
+
+  //
+  // Debug
+  //
+
+  Model.subscribe(m => {
+    Effects["log"](null, JSON.stringify(m));
+  });
+
+
+</script>

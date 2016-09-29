@@ -1,0 +1,20 @@
+<script>
+  views.button = function (options) {
+    var selector = options.selector ? options.selector : "button";
+    return {
+      renderMaquette: function () {
+        return vendors.maquette.h(selector, {onclick: options.onclick}, [options.content]);
+      }
+    }
+  };
+</script>
+
+<style>
+  button {
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+  }
+</style>

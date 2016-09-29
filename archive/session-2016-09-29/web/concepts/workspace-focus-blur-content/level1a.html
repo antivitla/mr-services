@@ -1,0 +1,111 @@
+<link rel="stylesheet" href="../textarea.css">
+
+<style>
+  textarea {
+    height: 20vh;
+  }
+</style>
+
+<!-- <textarea placeholder="Пиши - не пиши, всё одно.."></textarea> -->
+
+<!-- <list></list> -->
+
+<workspace>
+  <focus></focus>
+  <blur></blur>
+</workspace>
+
+<script>
+  // var textarea = document.querySelector("textarea");
+  // textarea.addEventListener("change", function () {
+  //   var note = document.createElement("note");
+  //   note.innerHTML = this.value;
+  //   document.querySelector("list").appendChild(note);
+  // });
+
+  // var workspace = {
+  //   element: document.querySelector("workspace"),
+  //   focus: function (item) {
+  //     this.focused.appendChild(item);
+  //   },
+  //   focused: {
+  //     element: document.querySelector("workspace focus"),
+  //   },
+  //   blur: function () {
+  //     this.blurred.element.appendChild(this.focused.element.children[0]);
+  //   },
+  //   blurred: {
+  //     element: document.querySelector("workspace blur");
+  //   }
+  // }
+
+  // // model
+  // var workspace = {
+  //   focus: {},
+  //   blur: {}
+  // };
+
+  // // view
+  // var workspace = document.querySelector("workspace"),
+  //   focus = workspace.querySelector("focus"),
+  //   blur = workspace.querySelector("blur");
+
+  // persist (store/save)
+  // ... firebase?
+
+  // commands user
+
+  // initial load (user command?)
+
+  // each THING has aspects - viewable, persistable, interactable (user action)
+
+  // Моделируем
+
+  function Note () {
+    return document.createElement("textarea");
+  }
+
+  /*
+
+  note.focus()
+  note.blur()
+  saveSession()
+
+  */
+
+  // function meta (currentWorkspace, newWorkspaceCallback) {
+  //   // оборачиваем "текущее" в фокус.
+  //   var focus = [currentWorkspace];
+  //   // создаем рядом блюр
+  //   var workspace = {
+  //     focus: focus,
+  //     blur: []
+  //   }
+  //   // кладем содержимое фокуса в блюр
+  //   while(workspace.focus.length > 0) {
+  //     workspace.blur.push(workspace.focus.shift());
+  //   };
+  //   // создаем свежее в текущем фокусе
+  //   workspace.focus.push(newWorkspaceCallback());
+  // }
+
+
+  function focus (item) {
+    document.querySelector("workspace focus").appendChild(item);
+  }
+
+  focus(new Note());
+
+  function blur () {
+    var b = document.querySelector("workspace blur");
+    var f = document.querySelector("workspace focus");
+    b.appendChild(f.children[0]);
+  }
+
+  document.querySelector("workspace focus").addEventListener("keydown", function (event) {
+    if (event.ctrlKey && event.keyCode == 13) { // ctrl + enter
+      blur();
+      focus(new Note());
+    }
+  });
+</script>

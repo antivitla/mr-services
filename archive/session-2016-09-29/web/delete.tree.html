@@ -1,0 +1,83 @@
+<link rel="stylesheet" href="assets/desk.css">
+<link rel="import" href="events/events.html">
+<link rel="import" href="vendors/vendors.html">
+<link rel="import" href="views/views.html">
+<link rel="import" href="views/tree.html">
+<link rel="import" href="modules/modules.html">
+<link rel="import" href="modules/tree.html">
+<link rel="import" href="storage/storage.html">
+
+
+<desk></desk>
+
+<script>
+  var modules = modules || {};
+
+  modules.app = function () {
+
+    // events
+
+
+
+    // model
+
+    var model = {
+      blur: {
+        "initial": {
+          type: "content",
+          content: "Initial Content",
+          key: "initial",
+        },
+      },
+      focus: "initial"
+    };
+
+    // components
+
+    var treeModule = modules.tree();
+    // get initial sample data
+    Object.assign(model.blur, treeModule.sample.blur);
+    model.focus = treeModule.sample.focus;
+
+    var treeView = views.tree({
+      getModel: function (globalModel) {
+        return globalModel.blur[globalModel.focus];
+      }
+    });
+
+    // bootstrap
+
+    return {
+      start: function () {
+        // 1. events
+        events.bootstrap({
+          state: (new Freezer(model)).get()
+        });
+
+        // 2. models
+        events.Model.subscribe(function (globalModel) {
+          model = globalModel.toJS();
+        });
+
+        // 3. views
+        views.bootstrap({
+          dom: document.querySelector("desk"),
+          renderMaquette: treeView.renderMaquette,
+        });
+      }
+    };
+  }();
+
+  document.addEventListener("DOMContentLoaded", function () {
+    modules.app.start();
+  });
+
+  events.Action.subscribe(function (action) {
+    console.log("%cAction: " + JSON.stringify(action, null, 2), "color: olive");
+  });
+
+  events.Model.subscribe(function (model) {
+    console.log("%cModel: " + JSON.stringify(model.blur[model.focus], null, 2), "color: gray");
+  });
+
+</script>

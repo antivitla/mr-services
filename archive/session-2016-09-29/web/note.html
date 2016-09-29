@@ -1,0 +1,266 @@
+<link rel="import" href="vendors/vendors.html">
+<link rel="import" href="events/events.html">
+<link rel="import" href="storage/storage.html">
+
+<!-- <link rel="import" href="models/content.html">
+<link rel="import" href="models/note.html">
+<link rel="import" href="models/workspace.html"> -->
+
+<link rel="import" href="views/views.html">
+<link rel="import" href="views/note.html">
+<link rel="import" href="views/button.html">
+
+<link rel="stylesheet" href="assets/desk.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+<desk></desk>
+
+<script>
+
+  //
+  // Events
+  //
+
+  events.Action.subscribe(function (action) {
+    switch(action.type) {
+
+      // Things
+
+      case events.Keys.NOTE_EDIT:
+        // effect
+        storageEffectSave(workspace.key + "/blur/" + workspace.focus + "/content", action.payload);
+        // model
+        events.Intent.onNext(function (state) {
+          return state
+            .set("blur",
+              state.blur.set(state.focus,
+                state.blur[state.focus].set("content", action.payload)));
+        });
+        break;
+
+      // User
+
+      case events.Keys.NEW_CONTENT:
+        // effect
+        var content = {content: ""};
+        content.key = storageEffectNewContent(workspace.key, content);
+        // model
+        events.Intent.onNext(function (state) {
+          if (!state.blur[state.focus].content) {
+            console.warn("current content is empty and you want new. Possibly storage memory leak.");
+          }
+          return state
+            .set("focus", content.key)
+            .set("blur",
+              state.blur.set(content.key, content));
+        });
+        break;
+
+      case events.Keys.PREV_CONTENT:
+        // effect
+        var contentKeys = Object.keys(workspace.blur);
+        contentKeys.splice(contentKeys.indexOf(workspace.focus), 1);
+        var randomContentKey = contentKeys[parseInt(Math.random() * contentKeys.length)];
+        storageEffectSave(workspace.key + "/focus", randomContentKey);
+        // model
+        events.Intent.onNext(function (state) {
+          return state.set("focus", randomContentKey);
+        });
+        break;
+
+      // System
+
+      case events.Keys.WORKSPACE_LOAD:
+        if (!action.payload) {
+          // effect
+          events.Action.onNext({
+            type: events.Keys.NEW_CONTENT
+          });
+        } else {
+          if (!action.payload.blur[action.payload.focus]) {
+            // effect
+            console.warn("focus have non-existing content. Making new");
+            var content = {content: ""};
+            content.key = storageEffectNewContent(workspace.key, content);
+            var blur = Object.assign({}, action.payload.blur);
+            blur[content.key] = content;
+            // model
+            events.Intent.onNext(function (state) {
+              return state
+                .set("focus", content.key)
+                .set("blur", blur);
+            })
+          } else {
+            // model
+            events.Intent.onNext(function (state) {
+              return state
+                .set("focus", action.payload.focus)
+                .set("blur", action.payload.blur);
+            });
+          }
+        }
+        break;
+    }
+  });
+
+  //
+  // Model
+  //
+
+  var workspace = {
+    focus: "initial",
+    blur: {
+      "initial": {content: "Если вы видите это до сих пор, значит случилось что-то не то."}
+    },
+    key: "/workspace"
+  };
+
+  events.Model.subscribe(function (model) {
+    workspace = model.toJS();
+  });
+
+  setTimeout(function () {
+    events.bootstrap({
+      state: (new Freezer(workspace)).get()
+    });
+  }, 10);
+
+  //
+  // Storage effects
+  //
+
+  storage.focus.load(workspace.key, events.Keys.WORKSPACE_LOAD);
+
+  function storageEffectNewContent (workspacePath, newContent) {
+    var key = storage.focus.add(workspacePath + "/blur", newContent);
+    storage.focus.save(workspacePath + "/focus", key);
+    return key;
+  }
+
+  function storageEffectSave(path, data) {
+    storage.focus.save(path, data);
+  }
+
+  //
+  // View effects
+  //
+
+  var uiContent = views.note({
+    placeholder: "Пиши - не пиши, всё ложь...",
+    rotate: (Math.random() - 0.5)*1.625,
+    getModel: function (state) {
+      if (!state.blur[state.focus]) {
+        console.warn("bad stuff - no focus item in blur")
+        return "";
+      } else {
+        return state.blur[state.focus].content;
+      }
+    }
+  });
+
+  var uiNewContent = views.button({
+    onclick: function (event) {
+      events.Action.onNext({
+        type: events.Keys.NEW_CONTENT,
+        payload: {content: ""}
+      });
+    },
+    selector: "i.material-icons.new-content",
+    content: "add",
+  });
+
+  var uiPrevContent = views.button({
+    onclick: function (event) {
+      events.Action.onNext({
+        type: events.Keys.PREV_CONTENT
+      });
+    },
+    selector: "i.material-icons.prev-content",
+    content: "more_horiz",
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    views.bootstrap({
+      dom: document.querySelector("desk"),
+      renderMaquette: function () {
+        return vendors.maquette.h("focus",
+          [
+            vendors.maquette.h("actions", [
+              (Object.keys(workspace.blur).length > 1 ? uiPrevContent.renderMaquette() : ""),
+              (workspace.blur[workspace.focus].content ? uiNewContent.renderMaquette() : ""),
+            ]),
+            uiContent.renderMaquette(),
+          ]);
+      }
+    });
+  });
+
+  //
+  // Debug
+  //
+
+  events.Action.subscribe(function (action) {
+    console.log("Action:", action);
+  });
+
+  events.Model.subscribe(function (model) {
+    console.log("Model:", model);
+  });
+
+</script>
+
+<style>
+  desk focus {
+    display: block;
+  }
+
+  desk note {
+    margin: 1rem auto;
+    box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.1);
+    border-radius: 0.25em;
+    position: relative;
+    left: 0;
+    transition: left 0.3s;
+  }
+
+  desk actions {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  desk .new-content,
+  desk .prev-content {
+    display: inline-block;
+    color: rgba(0,0,0,0.2);
+    /*background-color: red;*/
+    padding: 0 1rem;
+    height: 3rem;
+    line-height: 3rem;
+    /*font-size: medium;*/
+    cursor: pointer;
+    font-style: normal;
+  }
+
+  desk .new-content {
+    margin-left: auto;
+    margin-right: 0
+  }
+
+  desk .new-content:after {
+    /*content: "+";*/
+    /*font-size: xx-large;*/
+  }
+
+  desk .left-content {
+    margin-right: auto;
+    margin-left: 0;
+  }
+
+  desk .prev-content:after {
+    /*content: "…";*/
+    /*font-size: xx-large;*/
+    /*position: relative;*/
+    /*top: -0.3em;*/
+  }
+</style>

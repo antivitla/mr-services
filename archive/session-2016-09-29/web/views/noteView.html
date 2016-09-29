@@ -1,0 +1,55 @@
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../events/events.html">
+<link rel="import" href="../utils/all.html">
+<link rel="import" href="../models/note.html">
+<link rel="stylesheet" href="../assets/note.css">
+<script>
+  var views = views || {};
+  views.noteView = function (options) {
+    var options = Object.assign({
+      getModel: function (state) {
+        return state.blur[state.focus];
+      },
+      getDictionary: function (state) {
+        return state.blur;
+      },
+      initialModel: null,
+      events: null,
+      projector: null,
+      rotate: 0,
+      appearance: "paper",
+    }, options);
+
+    var model$ = options.events.Model;
+    // var action$ = options.events.Action;
+    // var EDIT = options.events.Keys.NOTE_EDIT;
+    // var SUBMIT = options.events.Keys.NOTE_SUBMIT;
+
+    // model
+
+    var note = options.initialModel || models.samples.note;
+
+    model$.subscribe(function (state) {
+      note = options.getModel(state).toJS ? options.getModel(state).toJS() : options.getModel(state);
+    });
+
+    // view
+
+    return {
+      renderMaquette: function () {
+        return vendors.maquette.h("note.view", {
+            styles: {
+              transform: "rotate("+options.rotate+"deg)"
+            },
+            classes: {
+              paper: options.appearance == "paper",
+              journal: options.appearance == "journal",
+            },
+            key: note,
+            id: note.key,
+          },
+          [vendors.maquette.h("div.textarea", utils.text2maquette(note.content, "markdown"))]);
+      }
+    };
+  };
+</script>

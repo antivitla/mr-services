@@ -1,0 +1,154 @@
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../models/note.html">
+<link rel="import" href="../events/events.html">
+<link rel="import" href="../utils/shortcut.html">
+<link rel="import" href="views.html">
+<link rel="import" href="textinfo.html">
+
+<script>
+  views.noteExpandable = function (options) {
+
+    function text2html (text) {
+      var maquette = [];
+      if (text) {
+        text.split("\n").forEach(function (item, id) {
+          maquette.push(item),
+          maquette.push(vendors.maquette.h("br", {key: id}));
+        });
+      }
+      return maquette;
+    }
+
+    //
+    // Model
+    //
+
+    var note = "";
+
+    events.Model.subscribe(function (model) {
+      note = options.getModel(model);
+    });
+
+    //
+    // Interactivity
+    //
+
+    function handleSubmit (event) {
+      if (utils.Shortcut["ctrl+enter"](event)) {
+        // effect
+        // action
+        events.Action.onNext({
+          type: events.Keys.NOTE_SUBMIT,
+          payload: this.value
+        });
+      }
+    }
+
+    function handleInput (event) {
+      // effect
+      note = this.value;
+      // action
+      events.Action.onNext({
+        type: events.Keys.NOTE_EDIT,
+        payload: this.value
+      });
+    }
+
+    //
+    // View
+    //
+
+    var uiExpand = views.button({
+      onclick: function (event) {
+        events.Action.onNext({
+          type: events.Keys.NOTE_EXPAND
+        });
+      },
+      selector: "i.fa.fa-expand.content-to-workspace",
+    });
+
+    return {
+      renderMaquette: function () {
+        return vendors.maquette.h((options.selector ? options.selector : "note"),
+          {
+            styles: {
+              transform: "rotate(" + options.rotate + "deg)"
+            }
+          },
+          [
+            vendors.maquette.h("div.textarea", text2html(note)),
+            vendors.maquette.h("textarea", {
+              placeholder: options.placeholder,
+              spellcheck: "false",
+              oninput: handleInput,
+              onkeyup: handleSubmit,
+              value: note,
+            }),
+            views.textinfo(note).renderMaquette(),
+            uiExpand.renderMaquette(),
+          ]
+        );
+      }
+    };
+  };
+</script>
+
+<style>
+  note {
+    display: block;
+    background-color: white;
+    max-width: 45em;
+    position: relative;
+  }
+
+  note textarea,
+  note .textarea {
+    border: 0;
+    outline: 0;
+    padding: 0;
+    box-sizing: border-box;
+    min-height: 61.8vh;
+    padding: 2em;
+    resize: none;
+    width: 100%;
+    display: block;
+    background-color: transparent;
+    font-size: inherit;
+  }
+
+  note textarea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow: hidden;
+  }
+
+  note .textarea {
+    color: transparent;
+  }
+
+  note textinfo {
+    font-size: small;
+    font-family: monospace;
+    position: absolute;
+    right: 1em;
+    bottom: 1em;
+    opacity: 0.5;
+    white-space: nowrap;
+  }
+
+  note .content-to-workspace {
+    position: absolute;
+    display: block;
+    top: 0.5rem;
+    right: 0.5rem;
+    cursor: pointer;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    text-align: center;
+    opacity: 0.125;
+  }
+</style>

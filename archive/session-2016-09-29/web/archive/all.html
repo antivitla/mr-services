@@ -1,0 +1,248 @@
+<!-- QUnit -->
+<link href="https://code.jquery.com/qunit/qunit-git.css" rel="stylesheet" type="text/css" />
+<script src="https://code.jquery.com/qunit/qunit-git.js"></script>
+<!-- Riot -->
+<!-- <script src="https://cdn.jsdelivr.net/riot/2.3/riot+compiler.min.js"></script> -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/riot/2.4.1/riot+compiler.min.js"></script> -->
+<!-- Rx -->
+<script src="node_modules/rx/dist/rx.all.min.js"></script>
+<!-- Cycle -->
+<script src="node_modules/@cycle/core/dist/cycle.min.js"></script>
+<script src="node_modules/@cycle/dom/dist/cycle-dom.min.js"></script>
+
+<!-- <script src="bundle.js"></script> -->
+
+<style>
+  textarea, input {
+    box-sizing: border-box;
+    /*padding: 0 5px;*/
+    /*margin-left: -5px;*/
+    /*margin-right: -5px;*/
+    border: solid #eee 1px;
+    width: 100%;
+    border-radius: 3px;
+    font-family: monospace;
+    display: block;
+    line-height: 24px;
+  }
+
+  textarea {
+    height: 150px;
+  }
+
+  button {
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: 10px 30px;
+  }
+
+  column {
+    display: inline-block;
+    width: 40%;
+    vertical-align: top;
+    text-align: center;
+  }
+
+  body {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  layout-column {
+    display: block;
+    /*float: left;*/
+    box-sizing: border-box;
+    padding: 0 1%;
+    margin-bottom: 4rem;
+  }
+
+  layout-column[width="50%"] {
+    width: 50%;
+  }
+
+  layout-column[width="100%"] {
+    width: 100%;
+  }
+</style>
+
+<layout-column width="50%">
+  <h1>Note</h1>
+  <p id="current-note-container"></p>
+  <p><textarea id="note-input">what's up</textarea></p>
+  <p><button id="new">New Item (Save Current)</button></p>
+  <p id="note-storage"></p>
+</layout-column>
+<script>
+  var noteInputTextarea = document.getElementById("note-input")
+  var button = document.getElementById("new")
+
+  var textareaStream = Rx.Observable.fromEvent(noteInputTextarea, "keyup")
+    .map(function (x) {
+      return {
+        data: noteInputTextarea.value,
+        type: "note"
+      }
+    }).debounce(500)
+
+  var buttonStream = Rx.Observable.fromEvent(button, "click")
+    .map(function (x) {
+      return {
+        action: "new data container"
+      }
+    })
+  var editStream = textareaStream.merge(buttonStream)
+</script>
+
+
+<layout-column width="50%">
+  <h1>Timer</h1>
+  <p><span id="current-time-container"></span></p>
+  <p><button id="time-input">Timer start</button></p>
+  <p><span id="time-storage"></span></p>
+</layout-column>
+<script>
+  var timeInputButton = document.getElementById("time-input")
+  var timeStream = Rx.Observable.fromEvent(timeInputButton, "click")
+    .map(function (x) {
+      return {
+        date: new Date(),
+        type: "time"
+      }
+    })
+  timeStream.subscribe(function (time) {
+    console.log(time)
+  })
+</script>
+
+
+
+
+<layout-column width="50%">
+  <h1>Money</h1>
+  <p><input id="money-input" type="text"></p>
+</layout-column>
+<script>
+  var moneyInputTextarea = document.getElementById("money-input")
+</script>
+
+
+
+
+<!-- <layout-column width="50%">
+  <h1>Structure</h1>
+  <p>Projects (???)</p>
+</layout-column> -->
+
+
+<!-- <layout-column width="50%">
+  <h1>UI current vs archive</h1>
+</layout-column> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  // Intent
+  var createNew = {
+    action: "create note"
+  };
+
+  console.log("Hello, i'm intent:", createNew)
+
+  // Поток данных
+  var dataStream = {}
+
+  // Текущий контейнер данных
+  var dataContainer = {}
+
+  // Хранилище контейнеров данных
+  var dataStorage = []
+
+</script>
+
+
+
+
+
+
+<script>
+  // Настройка потоков
+  dataStream = textareaStream
+</script>
+
+
+
+
+
+
+<layout-column width="100%">
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</layout-column>
+
+
+<script>
+
+  // Есть поток (чек), есть контейнер (чек),
+  // есть акт подсоединения контейнера к потоку (?)
+  // есть акт отсоединения контейнар от потока (?)
+  // есть акт складывания отсоединённого контейнера в хранилище (?)
+  // есть хранилище (чек)
+
+  // Кто подсоединяет, тот и отсоединяет
+
+  // Есть акт создания нового контейнера данных
+  // он включает в себя отсоединение старого если есть и...
+  // если это был новый контейнер, то положить его (себя) в хранилище
+  // а если... а как делать старые я не знаю
+  // а может в любом случае пушить в контейнер?
+  // отсоединение старого и складывание его в хранилище и подстановка нового
+
+  // складывать данные в контейнер
+
+  QUnit.module("dictionary")
+
+  // Есть поток данных.
+  QUnit.test("dataStream", function (assert) {
+    assert.ok(dataStream)
+  })
+
+  // Но эти данные всегда конкретного типа - заметка, время, что-то ещё
+  QUnit.test("data has a type", function (assert) {
+    var done = assert.async()
+    textareaStream.subscribe(function (item) {
+      console.log(item.type)
+      assert.equal(item.type, "note")
+      done()
+    })
+  })
+
+  // Проверим другой тип
+  QUnit.test("another data type", function (assert) {
+    var done = assert.async()
+    timeStream.subscribe(function (item) {
+      console.log(item.type)
+      assert.equal(item.type, "time")
+      done()
+    })
+  })
+
+  // В модель передаётся поток(и) намерений пользователя
+  // Есть намерение пользователя - формат данных такой
+  // Формы ввода (UI) должны преобразовать события в формат намерения
+
+
+
+</script>
+
+

@@ -1,0 +1,21 @@
+<link rel="import" href="../logic/tree.html">
+<link rel="import" href="../views/tree.html">
+<link rel="import" href="../models/tree.html">
+<link rel="import" href="standalone.html">
+<script>
+  var modules = modules || {};
+  modules.tree = function () {
+    return {
+      createStandalone: function () {
+        return modules.createStandalone({
+          model: models.samples.tree_workspace,
+          logic: logic.tree,
+          view: views.tree,
+          viewOptions: {
+            packed: false
+          },
+        });
+      }
+    }
+  };
+</script>

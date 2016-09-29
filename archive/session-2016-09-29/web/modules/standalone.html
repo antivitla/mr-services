@@ -1,0 +1,62 @@
+<link rel="import" href="../events/events.html">
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../vendors/freezer.html">
+<link rel="import" href="../storage/storage.html">
+<script>
+  var modules = modules || {};
+  modules.createStandalone = function (options) {
+    var options = Object.assign({
+      events: new Events(),
+      projector: vendors.maquette.createProjector(),
+      logic: function () {},
+      view: function () {
+        return {
+          renderMaquette: function () {
+            return vendors.maquette.h("div",["Пустой view"]);
+          }
+        };
+      },
+      logicOptions: {},
+      viewOptions: {},
+      model: {},
+      type: "app",
+    }, options);
+
+    var events = options.events;
+    var projector = options.projector;
+
+    // setup logic
+    var logic = options.logic(Object.assign({
+      events: options.events
+    }, options.logicOptions));
+
+    // setup view
+    var view = options.view(Object.assign({
+      events: options.events,
+      projector: options.projector,
+    }, options.viewOptions));
+
+    // delayed start
+    return {
+      start: function (dom) {
+        // 1. subscribe to model change
+        events.Model.subscribe(function (state) {
+          // model = state.toJS();
+          projector.scheduleRender();
+        });
+        // 2. start event flow
+        events.start({
+          state: (new vendors.freezer(options.model)).get()
+        });
+        // 3. render DOM
+        projector.append(dom, view.renderMaquette);
+        // 4. load from storage
+        storage.loadInitial({
+          events: options.events,
+          type: options.type,
+        });
+      },
+      events: events
+    };
+  };
+</script>

@@ -1,0 +1,196 @@
+<link rel="import" href="../vendors/maquette.html">
+<script>
+  var utils = utils || {};
+
+  utils.text2maquette = function (text, format) {
+    if (text) {
+      text = text.replace(/\s+$/g,"");
+      var lines = text.split("\n");
+      if (!format) {
+        return utils.parsePlain(lines);
+      } else if (format == "markdown") {
+        return utils.parseMarkdown(lines);
+      }
+    }
+  }
+
+  utils.parseMarkdown = function (lines) {
+    var h = vendors.maquette.h;
+    var vnodes = [];
+    lines.forEach(function (line, id) {
+      if (line.match(/^#\s+/)) {
+        vnodes.push(h("h1", {key:id}, [utils
+          .parseMarkdownLine(line.replace(/^#\s+/,""))]));
+      } else if (!line) {
+        vnodes.push(h("div", {key:id}, [utils.nbsp]));
+      } else if (line.match(/\*\s+\*\s+\*/)) {
+        vnodes.push(h("div.divider", ["* * *"]));
+      } else {
+        vnodes.push(h("div", {key:id}, [utils
+          .parseMarkdownLine(line)]));
+      }
+    });
+    return vnodes;
+  }
+
+  utils.parseMarkdownLine = function (line) {
+    var h = vendors.maquette.h;
+    var vnodes = [];
+
+    // images
+
+    if (line.match(/https?:\/\/[^\s]+\.(png|jpg|jpeg|gif)/g)) {
+      var images = line.match(/https?:\/\/[^\s]+\.(png|jpg|jpeg|gif)/g);
+      images.forEach(function(src) {
+        if (line.indexOf(src) > 0) {
+          vnodes.push(utils
+            .parseMarkdownLine(line.substr(0, line.indexOf(src))));
+        }
+        vnodes.push(h("img",{src:src,styles:{"max-width":"100%"}}));
+        line = line.split(src);
+        line.shift();
+        line = line.join(src);
+      });
+      if (line) {
+        vnodes.push(utils
+          .parseMarkdownLine(line));
+      }
+    }
+
+    // link
+
+    else if (line.match(/https?:\/\/[^\s]+/g)) {
+      var links = line.match(/https?:\/\/[^\s]+/g);
+      links.forEach(function(link) {
+        if (line.indexOf(link) > 0) {
+          vnodes.push(utils
+            .parseMarkdownLine(line.substr(0, line.indexOf(link))));
+        }
+        vnodes.push(h("a",{href:link,target:"_blank"},[link]));
+        line = line.split(link);
+        line.shift();
+        line = line.join(link);
+      });
+      if (line) {
+        vnodes.push(utils
+          .parseMarkdownLine(line));
+      }
+    }
+
+    // strong
+
+    else if (line.match(/\*\*.+\*\*/g)) {
+      var strongs = line.match(/\*\*.+\*\*/g);
+      strongs.forEach(function (strong) {
+        if (line.indexOf(strong) > 0) {
+          vnodes.push(utils
+            .parseMarkdownLine(line.substr(0, line.indexOf(strong))));
+        }
+        vnodes.push(h("strong", [utils
+          .parseMarkdownLine(strong.replace(/\*\*/g,""))]));
+        line = line.split(strong);
+        line.shift();
+        line = line.join(strong);
+      });
+      if (line) {
+        vnodes.push(utils
+          .parseMarkdownLine(line));
+      }
+    }
+
+    // strong variant
+
+    else if (line.match(/__.+__/g)) {
+      var strongs = line.match(/__.+__/g);
+      strongs.forEach(function (strong) {
+        if (line.indexOf(strong) > 0) {
+          vnodes.push(utils
+            .parseMarkdownLine(line.substr(0, line.indexOf(strong))));
+        }
+        vnodes.push(h("strong", [utils
+          .parseMarkdownLine(strong.replace(/__/g,""))]));
+        line = line.split(strong);
+        line.shift();
+        line = line.join(strong);
+      });
+      if (line) {
+        vnodes.push(utils
+          .parseMarkdownLine(line));
+      }
+    }
+
+    // em
+
+    else if (line.match(/\*.+\*/g)) {
+      var ems = line.match(/\*.+\*/g);
+      ems.forEach(function(em) {
+        if (line.indexOf(em) > 0) {
+          vnodes.push(utils
+            .parseMarkdownLine(line.substr(0, line.indexOf(em))));
+        }
+        vnodes.push(h("em", [utils
+          .parseMarkdownLine(em.replace(/\*/g,""))]));
+        line = line.split(em);
+        line.shift();
+        line = line.join(em);
+      });
+      if (line) {
+        vnodes.push(utils
+          .parseMarkdownLine(line));
+      }
+    }
+
+    // em variant
+
+    else if (line.match(/_.+_/g)) {
+      var ems = line.match(/_.+_/g);
+      ems.forEach(function(em) {
+        if (line.indexOf(em) > 0) {
+          vnodes.push(utils
+            .parseMarkdownLine(line.substr(0, line.indexOf(em))));
+        }
+        vnodes.push(h("em", [utils
+          .parseMarkdownLine(em.replace(/_/g,""))]));
+        line = line.split(em);
+        line.shift();
+        line = line.join(em);
+      });
+      if (line) {
+        vnodes.push(utils
+          .parseMarkdownLine(line));
+      }
+    }
+
+    // just line
+
+    else {
+      vnodes.push(line);
+    }
+
+    // return maquette
+
+    return vnodes;
+  }
+
+  // "**1** dfsjdhjfsd **1** dfsdfsdf sdf hjhkd s**fgdg8** fgdf d **4** fgdf fd g **1**"
+
+  utils.parsePlain = function (lines) {
+    var h = vendors.maquette.h;
+    var vnodes = [];
+    lines.forEach(function (line, id) {
+      vnodes.push(line);
+      vnodes.push(h("br", { key:id }));
+    });
+    return vnodes;
+  };
+
+  // HTML Entities
+
+  (function () {
+    var div = document.createElement("div");
+    // &nbsp;
+    div.innerHTML = "&nbsp;";
+    utils.nbsp = div.textContent;
+  }());
+
+</script>

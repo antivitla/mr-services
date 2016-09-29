@@ -1,0 +1,163 @@
+<link rel="import" href="../vendors/firebase.html">
+<link rel="import" href="../vendors/q.html">
+<link rel="import" href="../events/events.html">
+<link rel="import" href="../models/content.html">
+<link rel="import" href="../models/workspace.html">
+<script>
+
+  // Firebase storage
+  vendors.firebase.initializeApp({
+    apiKey: "AIzaSyCTiZnCVDPfjk35xCIUCWpiQXjBs3p4HDY",
+    authDomain: "brilliant-fire-1299.firebaseapp.com",
+    databaseURL: "https://brilliant-fire-1299.firebaseio.com",
+    // storageBucket: "brilliant-fire-1299.appspot.com",
+  });
+
+  function FirebaseStorage (database) {
+    models.Content.call(this, database);
+    this.key = "firebase";
+  }
+
+  FirebaseStorage.prototype.load = function (path) {
+    var deferred = vendors.q.defer();
+    this.content.ref(path).once("value")
+      .then(function (snapshot) {
+        deferred.resolve(snapshot.val());
+      });
+    return deferred.promise;
+  };
+
+  // FirebaseStorage.prototype.add = function (path, data, callback) {
+  //   if (typeof data != "object") {
+  //     console.error("data", data, "supposed to be object, we want attach key to it. Wrap in {content: data}? Aborting...");
+  //     return;
+  //   }
+  //   var place = this.content.ref(path), key, newData;
+  //   if (data.key) {
+  //     console.warn("data", data, "already have a storage key. Bug somewhere?");
+  //     key = data.key;
+  //     newData = Object.assign({}, data);
+  //   } else {
+  //     key = place.push().key;
+  //     newData = Object.assign({}, data, {key: key});
+  //   }
+  //   place.child(key).set(newData, callback);
+  //   return key;
+  // }
+
+  FirebaseStorage.prototype.loadItemsByType = function (type) {
+    var deferred = vendors.q.defer();
+    this.content.ref("/workspace/blur")
+      .orderByChild("type")
+      .equalTo(type)
+      .once("value", function (snapshot) {
+        var items = snapshot.val();
+        if (!items) {
+          console.warn("ITEMS_NOT_FOUND");
+          deferred.reject(storage.Keys.ITEMS_NOT_FOUND);
+        } else {
+          deferred.resolve(items);
+        }
+      });
+    return deferred.promise;
+  }
+
+  // Set current storage to firebase
+  storage = new models.Workspace(new FirebaseStorage(vendors.firebase.database()));
+
+  // storage.add = function () {
+  //   this.focus.add.apply(this.focus, arguments);
+  // };
+
+  storage.load = function () {
+    return this.focus.load.apply(this.focus, arguments);
+  };
+
+  storage.loadItemsByType = function (type) {
+    return this.focus.loadItemsByType.apply(this.focus, arguments);
+  };
+
+  storage.loadItemInFocus = function () {
+    return this.load("/workspace/focus")
+      .then(function (focus) {
+        if (!focus) {
+          console.warn("FOCUS_EMPTY", focus);
+          var deferred = vendors.q.defer();
+          deferred.reject(storage.Keys.FOCUS_EMPTY);
+          return deferred.promise;
+        } else {
+          return storage.load("/workspace/blur/" + focus);
+        }
+      })
+      .then(function (item) {
+        var deferred = vendors.q.defer();
+        if (!item) {
+          console.warn("ITEM_IN_FOCUS_NOT_EXIST", item);
+          deferred.reject(storage.Keys.ITEM_IN_FOCUS_NOT_EXIST);
+        } else {
+          deferred.resolve(item);
+        }
+        return deferred.promise;
+      });
+  };
+
+  storage.loadInitial = function (options) {
+    var options = Object.assign({
+      type: "app",
+      events: null,
+    }, options);
+
+    var self = this;
+
+    self.loadItemInFocus()
+      .then(function (item) {
+        if (item.type == options.type) {
+          issueItemLoadedAction(item);
+        } else {
+          loadAppItems();
+        }
+      })
+      .fail(function () {
+        loadAppItems();
+      });
+
+    function loadAppItems () {
+      self.loadItemsByType(options.type)
+        .then(function (items) {
+          issueItemsLoadedAction(items);
+        }, function () {
+          issueCreateNewItemAction(options.type);
+        });
+    }
+
+    function issueItemLoadedAction (item) {
+      options.events.Action.onNext({
+        type: options.events.Keys.ITEM_LOADED,
+        payload: item
+      });
+    }
+
+    function issueItemsLoadedAction (items) {
+      options.events.Action.onNext({
+        type: options.events.Keys.ITEMS_LOADED,
+        payload: items
+      });
+    }
+
+    function issueCreateNewItemAction (type) {
+      options.events.Action.onNext({
+        type: options.events.Keys.CREATE_NEW_ITEM,
+        payload: {
+          type: type
+        },
+      });
+    }
+  }
+
+  storage.Keys = {
+    FOCUS_EMPTY: "FOCUS_EMPTY",
+    ITEM_IN_FOCUS_NOT_EXIST: "ITEM_IN_FOCUS_NOT_EXIST",
+    ITEMS_NOT_FOUND: "ITEMS_NOT_FOUND",
+  };
+
+</script>

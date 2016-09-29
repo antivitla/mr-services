@@ -1,0 +1,64 @@
+<script>
+  var models = models || {samples: {}};
+
+  models.samples.tree = {
+    type:"tree", key: "recollecting",
+    content: "Перепросмотр",
+    tree: {nothing: true,death:true},
+  };
+
+  models.samples.tree_dictionary = {
+    work: {
+      type: "group", key: "work",
+      content: "Работа",
+      group: {andreikis:true,seanat:true}
+    },
+    zenru: {
+      type: "group", key: "zenru",
+      content: "Зен.ру",
+      group: {seanat:true}
+    },
+    friends: {
+      type: "group", key: "friends",
+      content: "Друзья",
+      group: {seanat:true}
+    },
+    andreikis: {
+      type: "tree", key: "andreikis",
+      content: "Андрей Кисвянцев",
+      description: "И его штуки и моя любовь",
+      notes: {},
+      group: {work:true},
+    },
+    seanat: {
+      type: "tree", key: "seanat",
+      content: "Сеанат",
+      group: {zenru:true,work:true,friends:true},
+    },
+    zhenja: {
+      type: "tree", key: "zhenja",
+      content: "Женя Большакова",
+      group: {women:true,loved:true}
+    },
+    nothing: {
+      type: "tree", key:"nothing",
+      content: "Никого не существовало, ничего не было",
+      tree: {andreikis:true,seanat:true,zhenja:true},
+    },
+    death: {
+      type:"tree", key:"death",
+      content: "Смерть",
+      draft: [
+        "ул. Толстого, 12 лет, Иисус спасет от смерти или инопланетяне знают рецепт",
+        "Боится ли бабушка смерти",
+      ],
+      tree:{},
+    },
+    recollecting: models.samples.tree,
+  };
+
+  models.samples.tree_workspace = {
+    blur: models.samples.tree_dictionary,
+    focus: "recollecting",
+  };
+</script>

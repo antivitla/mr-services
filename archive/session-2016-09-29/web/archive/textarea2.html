@@ -1,0 +1,168 @@
+<link rel="stylesheet" href="textarea.css">
+<link rel="import" href="rx.html">
+<link rel="import" href="intent.html">
+<link rel="import" href="utils/update.html"></link>
+
+
+<div style="position: relative;"></div>
+<preloader></preloader>
+<textarea></textarea>
+
+<script>
+
+var mr = mr || {};
+
+mr.textareaComponent = function (sources) {
+
+  // Sources of side-effects ----------------------------
+
+  // var sources = {
+  //   DOM: document.querySelector("textarea"),
+  //   storage: localStorage
+  // };
+
+  // Convert events from sources into action stream
+  // a) Events. What is it
+  // b) Actions. Which are they
+  //    b.1) Edit/Change: new value of note
+  //    b.2) We have Global User Intents Pipe
+  //    b.3) We Local Low-level Actions pipes for each UI-component
+
+
+
+  //
+  // Weave action streams from raw input effects --------------------------
+  //
+
+  /*
+                               raw event
+        raw ev  raw event           /
+                      raw event    /
+         |       |        |       /
+         \______ |   ____ | ______/
+               \| __/ _____/
+               \|//
+                |
+              actions
+  */
+
+  // edit
+  var noteEditAction$ = Rx.Observable
+    .merge(
+      Rx.Observable.fromEvent(sources.DOM, "change"),
+      Rx.Observable.fromEvent(sources.DOM, "keyup")
+    )
+    .map(event => event.target.value)
+    .distinctUntilChanged()
+    .map(text => ({
+      type: "NOTE_EDIT",
+      payload: text
+    }));
+
+  // init
+  var noteInitAction$ = Rx.Observable
+    .of(sources.storage.getItem("textarea"))
+    .map(text => ({
+      type: "NOTE_INIT",
+      payload: (text ? text : '')
+    }));
+
+  // combined action
+  var action$ = Rx.Observable.merge(noteEditAction$, noteInitAction$);
+
+
+  //
+  // Export to Global Intent inside
+  //
+
+
+  action$
+    .subscribe(action => {
+      Intent.onNext(action);
+    });
+
+
+  //
+  // Spray output side-effects
+  //
+
+  /*
+
+                          actions
+                           ||||
+        _______________________________
+        /             __/              /
+      / ---/         /  /            effect
+  effect  effect   effects
+
+  */
+
+  // action$
+  //   .subscribe(action => {
+  //     log(action);
+  //   });
+
+  noteInitAction$
+    .filter(action => action.type == "NOTE_INIT")
+    .subscribe(action => {
+      initTextarea(action.payload, sources);
+    });
+
+  noteEditAction$
+    .filter(action => action.type == "NOTE_EDIT")
+    .debounce(500)
+    .subscribe(action => {
+      saveText(action.payload, sources);
+      crazyColor(sources);
+    });
+
+
+  // Effect: init textarea from localStorage
+  function initTextarea(text, sources) {
+    sources.DOM.value = text;
+    setTimeout(function () {
+      sources.DOM.style.opacity = 1;
+    }, 500);
+  }
+
+  // Effect: save text
+  function saveText (text, sources) {
+    sources.storage.setItem("textarea", text);
+  }
+
+  // Effect: crazy color
+  function crazyColor (sources) {
+      var r = parseInt(Math.random()*240),
+        g = parseInt(Math.random()*240),
+        b = parseInt(Math.random()*240),
+        a = Math.random()*1,
+        rgba = String("rgba(" + r + "," + g + "," + b + ", 1)");
+      sources.DOM.style.color = rgba;
+  }
+
+  // Effect: log
+  function log (action) {
+    console.log(`${action.type}: ${action.payload}`);
+  }
+
+
+
+  //
+  // return
+  //
+
+  return action$;
+}
+
+// start self
+// mr.textareaComponent({
+//   DOM: document.querySelector("textarea"),
+//   storage: localStorage
+// });
+
+</script>
+
+
+
+
+

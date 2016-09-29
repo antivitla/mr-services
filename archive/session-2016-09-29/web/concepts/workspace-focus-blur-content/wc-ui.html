@@ -1,0 +1,242 @@
+<link rel="stylesheet" href="../textarea.css">
+
+
+
+<!-- Event Stream -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.js"></script>
+<script>
+
+
+  /*
+
+  Действия:
+
+  1. Записывание записи. она ешё не готова, но она уже вот она, есть, лежит на *столе
+  2. Завершение записи, она не остается валяться на столе, я её куда-то складываю в *надлежащее ей *место. То есть существует структура уже какая-то, куда я её кладу? И данный акт является вкладыванием данного контента в выбранную мной структуру (или заданную по умолчанию)
+  3. Написав быстро "с нуля" заметку, я ещё не знаю куда её скласть, но на столе она тоже валяться не должна. Какое-то промежуточное место. При этом она обладает датой, то есть её легко будет скласть в нужные структуры когда я пойму в какие.
+
+  */
+
+  (function () {
+    var contentStream = new Rx.ReplaySubject(1);
+
+    contentStream.onNext(1);
+    contentStream.onNext(4);
+
+    setTimeout(function () {
+      contentStream.onNext(100);
+    },100);
+
+    setTimeout(function () {
+      contentStream.onNext(200);
+    },200);
+
+    setTimeout(function () {
+      contentStream.onNext(300);
+    },300);
+
+    contentStream.subscribe(function (content) {
+      console.log("content", content);
+    });
+  } ());
+</script>
+
+
+
+<!-- Model -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.1/immutable.min.js"></script>
+<script>
+  function Content (content) {
+    this.content = content;
+  }
+
+  function Workspace (content) {
+    this.focus = content;
+    this.blur = [];
+  }
+
+  Workspace.prototype.add = function (content) {
+    this.blur.push(this.focus);
+    this.focus = content;
+  };
+
+  var content = new Content("Hello, world. Accept me.");
+  var workspace = new Workspace(content);
+  workspace.add(new Content("Another content. Ok?"));
+  workspace.add(new Content("Third try."));
+</script>
+
+
+<!-- Actions over Model -->
+<script>
+  function action (model) {
+    return model;
+  }
+</script>
+
+
+
+<!-- Storage -->
+<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  firebase.initializeApp({
+    apiKey: "AIzaSyCTiZnCVDPfjk35xCIUCWpiQXjBs3p4HDY",
+    authDomain: "brilliant-fire-1299.firebaseapp.com",
+    databaseURL: "https://brilliant-fire-1299.firebaseio.com",
+    // storageBucket: "brilliant-fire-1299.appspot.com",
+  });
+</script>
+
+
+
+<!-- UI -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maquette/2.3.3/maquette.js"></script>
+<script>
+  var ui = {};
+</script>
+
+<!-- content -->
+<script>
+  ui.content = function (model) {
+    return {
+      renderMaquette: function () {
+        return maquette.h("content", {key: model.content}, [model.content]);
+      }
+    }
+  };
+</script>
+
+
+<!-- Focus -->
+<script>
+  ui.focus = function (model) {
+    return {
+      renderMaquette: function () {
+        return maquette.h("focus", [ui.content(model).renderMaquette()]);
+      }
+    };
+  };
+</script>
+<style>
+  focus {
+    background-color: yellow;
+    display: block;
+  }
+
+  focus + *,
+  * + focus {
+    margin-top: 0.5rem;
+  }
+</style>
+
+
+
+<!-- UI Blur -->
+<script>
+  ui.blur = function (model) {
+    var mapping = maquette.createMapping(
+      function getSourceKey (source) {
+        return source.content;
+      },
+      function createTarget (source) {
+        return {
+          renderMaquette: function () {
+            return ui.content(source).renderMaquette();
+          }
+        };
+      },
+      function updateTarget (updatedSource, target) {
+        // This function can be used to update the component with the updated item
+      });
+
+    mapping.map(model);
+
+    return {
+      renderMaquette: function () {
+        return maquette.h("blur", mapping.results.map(function (component) {
+          return component.renderMaquette();
+        }));
+      },
+      mapping: mapping,
+    };
+  };
+</script>
+<style>
+  * + blur {
+    margin-top: 0.5rem;
+  }
+
+  blur content {
+    display: block;
+  }
+
+  blur content + content {
+    margin-top: 0.5rem;
+  }
+
+  blur {
+    display: block;
+  }
+</style>
+
+
+<!-- Workspace -->
+<script>
+  ui.workspace = function (model) {
+    var blurWidget = ui.blur(model.blur);
+
+    function handleDone () {
+      // logic (event -> action -> model)
+      model.blur.unshift(model.focus);
+      model.focus = new Content("[empty]");
+
+      // update ui
+      blurWidget.mapping.map(model.blur);
+    }
+
+    return {
+      renderMaquette: function () {
+        return maquette.h("workspace", [
+          ui.focus(model.focus).renderMaquette(),
+          maquette.h("button", {onclick: handleDone}, "Done"),
+          blurWidget.renderMaquette()
+        ]);
+      }
+    };
+  };
+</script>
+
+
+
+<!-- App bootstrap -->
+<script>
+  var components = [];
+
+  components.push(ui.workspace(workspace));
+
+  var maquetteProjector = maquette.createProjector();
+
+  document.addEventListener("DOMContentLoaded", function () {
+    maquetteProjector.append(document.body, function () {
+      return maquette.h("app", components.map(function (component) {
+        return component.renderMaquette();
+      }));
+    });
+  });
+
+
+</script>
+<style>
+  app { display: block; margin: 5rem auto; max-width: 960px;  }
+</style>
+
+
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script src="https://code.jquery.com/qunit/qunit-2.0.0.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.0.css">
+<script>
+  // tests
+</script>
+

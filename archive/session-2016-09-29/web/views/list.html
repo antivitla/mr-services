@@ -1,0 +1,63 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../models/list.html">
+<link rel="import" href="../models/tree.html">
+<link rel="import" href="../models/journal.html">
+
+<script>
+  var views = views || {};
+  views.list = function (options) {
+    var options = Object.assign({
+      getModel: function (state) { return state; },
+      events: null,
+      projector: null,
+    }, options);
+
+    var model$ = options.events.Model;
+    var list = models.samples.list;
+    var uiItemsMapping = vendors.maquette.createMapping(
+      function getSourceKey (source) {
+        return source.key ? source.key : source;
+      },
+      (options.createItem ? options.createItem : function createTarget(source) {
+        return {
+          renderMaquette: function () {
+            var h = vendors.maquette.h;
+            var key = source.key ? source.key : source;
+            return h("item", {"data-key": key, key: key}, [source]);
+          }
+        };
+      }),
+      function updateTarget (updatedSource, target) {}
+    );
+
+    model$.subscribe(function (state) {
+      list = options.getModel(state);
+      uiItemsMapping.map(list);
+    });
+
+    uiItemsMapping.map(list);
+
+    return {
+      renderMaquette: function () {
+        var h = vendors.maquette.h;
+        return h("list", [uiItemsMapping.results.map(function (item) {
+          return item.renderMaquette();
+        })]);
+      }
+    }
+  }
+</script>
+
+<style>
+  list {
+    display: block;
+  }
+
+  list item {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    margin: 1rem;
+  }
+</style>

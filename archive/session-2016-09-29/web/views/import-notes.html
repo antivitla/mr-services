@@ -1,0 +1,164 @@
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../events/events.html">
+<link rel="import" href="../utils/all.html">
+<link rel="import" href="../models/import-notes.html">
+<link rel="import" href="../views/note.html">
+<link rel="import" href="../views/noteView.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+<script>
+  var views = views || {};
+  views.importNotes = function (options) {
+    var options = Object.assign({
+      getModel: function (state) {
+        return state.note;
+      },
+      // getDictionary: function (state) {
+      //   return state.blur;
+      // },
+      initialModel: null,
+      events: null,
+      projector: null,
+      // placeholder: "Напиши что-нибудь..",
+      // rotate: 0,
+      // appearance: "none",
+    }, options);
+
+    var model$ = options.events.Model;
+    var action$ = options.events.Action;
+    var PROGRESS = options.events.Keys.PROGRESS;
+
+    var importResult = options.initialModel || models.samples.import_notes;
+    var progress = 0;
+    var isInProgress = false;
+    var storageKey = "";
+
+    model$.subscribe(function (state) {
+      importResult = state.toJS();
+      notesMapping.map(importResult.notes);
+      // storageKey = state.storageKey;
+    });
+
+    action$
+      .filter(function (action) { return action.type == PROGRESS; })
+      .subscribe(function (action) {
+        progress = action.payload;
+        if (progress < 99) {
+          isInProgress = true;
+        } else {
+          isInProgress = false;
+        }
+      });
+
+    var uiEdit = views.note({
+      events: options.events,
+      appearance: "paper",
+      mode: "edit",
+      getModel: function (state) {
+        return state.note;
+      }
+    });
+
+    var notesMapping = vendors.maquette.createMapping(
+      function getSourceKey(source) {
+        return source;
+      },
+      function createTarget(source) {
+        var uiNote = views.noteView({
+          events: options.events,
+          appearance: "journal",
+          mode: "view",
+          getModel: function (state) {
+            if (!state.notes[source.key]) {
+              return state.note;
+            } else {
+              return state.notes[parseInt(source.key)];
+            }
+          },
+          initialModel: source,
+        });
+        return uiNote;
+        // return {
+        //   renderMaquette: function () {
+        //     var h = vendors.maquette.h
+        //     return h("div", {
+        //       styles: {
+        //         "border-top":"solid lightgrey 1px",
+        //         "padding": "1rem"
+        //       },
+        //       key: source.key
+        //     }, utils.text2maquette(source.content));
+        //   }
+        // };
+      },
+      function updateTarget(updatedSource, target) {}
+    );
+
+    return {
+      renderMaquette: function () {
+        var h = vendors.maquette.h;
+        return h("import-notes", [
+          h("h1", ["Импортируем заметки в ", importResult.storageKey]),
+          h("import-progress", {classes: {active: isInProgress}}, [
+            h("i.material-icons",["loop"]),
+            h("span", {styles: {opacity: "0.5"}}, [progress+" %"])
+          ]),
+          h("columns", [
+            h("column.source", {key:1}, [uiEdit.renderMaquette()]),
+            h("column.target", {key:2}, [notesMapping.results.map(function (n) { return n.renderMaquette(); })]),
+          ])
+        ]);
+      }
+    };
+  }
+</script>
+
+<style>
+  import-notes {
+    width: 100%;
+    display: block;
+  }
+
+  import-notes column.target {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  import-notes h1 {
+    font-weight: 300;
+    text-align: center;
+  }
+
+  import-progress {
+    display: block;
+    text-align: center;
+    margin: 1rem auto;
+    visibility: hidden;
+  }
+
+  import-progress > * {
+    vertical-align: middle;
+  }
+
+  import-progress > * + * {
+    margin-left: 0.5rem;
+  }
+
+  @keyframes loading {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(-360deg);
+    }
+  }
+
+  import-progress.active {
+    visibility: visible;
+  }
+
+  import-progress.active i.material-icons {
+    animation: loading 2s linear infinite;
+  }
+</style>

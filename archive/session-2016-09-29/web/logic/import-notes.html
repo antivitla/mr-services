@@ -1,0 +1,281 @@
+<link rel="import" href="../storage/storage.html">
+<script>
+  var logic = logic || {};
+  logic.importNotes = function (options) {
+    var options =  Object.assign({
+      getPivotedModel: function (state) {
+          return state.pivot().blur[state.focus];
+      },
+      getPivotedWorkspace: function (state) {
+        return state.pivot();
+      },
+      events: null,
+      storageKey: null,
+    }, options);
+
+    var action$ = options.events.Action;
+    var intent$ = options.events.Intent;
+    var EDIT = options.events.Keys.NOTE_EDIT;
+    var SUBMIT = options.events.Keys.NOTE_SUBMIT;
+    var PROGRESS = options.events.Keys.PROGRESS
+    var lines$;
+
+    var currentNote = null;
+    var currentDate = new Date();
+    var notes = [];
+    var insideNote = false;
+    var dispose;
+    // var lineslength = 0;
+
+    function resetImportVars() {
+      currentNote = null;
+      currentDate = new Date();
+      notes = [];
+      insideNote = false;
+      if (dispose) {
+        dispose.dispose();
+      }
+      // lines = lines;
+    }
+
+    function saveNote (note) {
+      var note = Object.assign({}, note);
+      delete note.key;
+      note.content = note.content.replace(/\s+$/g,"");
+      note.content = note.content.replace(/^\s+/g,"");
+      storage.add(options.storageKey, note);
+    }
+
+    function getMonthNumber (str) {
+      var m = 0;
+      if (str.match(/янв/)) { m = 0; }
+      else if (str.match(/фев/)) { m = 1; }
+      else if (str.match(/мар/)) { m = 2; }
+      else if (str.match(/апр/)) { m = 3; }
+      else if (str.match(/май/)) { m = 4; }
+      else if (str.match(/мая/)) { m = 4; }
+      else if (str.match(/июн/)) { m = 5; }
+      else if (str.match(/июл/)) { m = 6; }
+      else if (str.match(/авг/)) { m = 7; }
+      else if (str.match(/сен/)) { m = 8; }
+      else if (str.match(/окт/)) { m = 9; }
+      else if (str.match(/ноя/)) { m = 10; }
+      else if (str.match(/дек/)) { m = 11; }
+      else {m = 0;}
+      return m;
+    }
+
+    function parseLines (lines) {
+      resetImportVars();
+
+      var lineslength = lines.length;
+
+      lines$ = vendors.Rx.Observable
+        .interval(50)
+        .take(lines.length)
+        .map(function (i) { return {id: i, line: lines[i] }; });
+
+      lastAction = "start parse";
+      action$.onNext({type: "start parse"});
+
+      lastAction = "new note";
+      action$.onNext({type: "new note"});
+
+      dispose = lines$.subscribe(function (obj) {
+        var line = obj.line;
+        var id = obj.id + 1;
+        action$.onNext({
+          type: PROGRESS,
+          payload: parseInt(Math.round((id/lineslength)*100))
+        });
+
+        // line break
+        if (line.replace(/\s/g,"") == "") {
+          if (insideNote) {
+            lastAction = "new linebreak";
+            action$.onNext({type: "new linebreak"});
+          }
+        }
+        // note break
+        else if (line.match(/\* \* \*/g)) {
+          insideNote = false;
+          lastAction = "new note";
+          action$.onNext({type: "new note"});
+        }
+        // new date and header
+        else if (line.match(/^# /g)) {
+          insideNote = false;
+          var year = line.match(/(19\d\d|20\d\d)/g);
+          if (year) {
+            if (lastAction != "new note") {
+              lastAction = "new note";
+              action$.onNext({type: "new note"});
+            }
+            lastAction = "new year";
+            action$.onNext({type: "new year", payload: year[0]});
+          }
+
+          var month = line.match(/( январ| феврал| март\s?| апрел| май\s?| мая\s?| июн| июл| август| сентябр| октябр| ноябр| декабр)/g);
+          if (month) {
+            lastAction = "new month";
+            action$.onNext({type: "new month", payload: month[0]});
+          }
+
+          var date = line.match(/\d?\d( январ| феврал| март\s?| апрел| май\s?| мая\s?| июн| июл| август| сентябр| октябр| ноябр| декабр)/g);
+          if (date) {
+            date = date[0].match(/\d+/g)[0];
+            lastAction = "new month";
+            action$.onNext({type: "new date", payload: date});
+          }
+
+          // header
+
+          var header = "";
+          if (!year && !month && !date) {
+            header = line.replace(/#\s+/, "");
+          } else {
+            header = line.split(",").slice(1).join(",").replace(/^\s+/,"").replace(/$\s+/,"");
+          }
+
+          if (header) {
+            insideNote = true;
+            lastAction = "new textline";
+            action$.onNext({type: "new textline", payload: ("# " + header) });
+          }
+        }
+        // just add text
+        else {
+          insideNote = true;
+          lastAction = "new textline";
+          action$.onNext({type: "new textline", payload: line });
+        }
+      },
+      function (error) {},
+      // comlete
+      function () {
+        lastAction = "finish parse";
+        action$.onNext({type: "finish parse" });
+      });
+    }
+
+    // Parse actions
+
+    action$
+      .filter(function(action) { return action.type == "finish parse"; })
+      .subscribe(function (action) {
+        notes.push(currentNote);
+        saveNote(currentNote);
+        intent$.onNext(function (state) {
+          return state.pivot()
+            .notes.push(currentNote);
+        });
+      });
+
+    action$
+      .filter(function(action) { return action.type == "start parse"; })
+      .subscribe(function (action) {
+        intent$.onNext(function (state) {
+          return state.pivot()
+            .set("lines", [])
+            .set("notes", [])
+            .set("current_note", null)
+        });
+      });
+
+    action$
+      .filter(function(action) { return action.type == "new note"; })
+      .subscribe(function (action) {
+        var oldNote = currentNote;
+        if (oldNote) {
+          saveNote(oldNote);
+          notes.push(oldNote);
+          currentNote = {content: "", created_at: (new Date(currentDate)).getTime(), key: notes.length};
+          intent$.onNext(function (state) {
+            return state.pivot()
+              .notes.push(oldNote)
+              .set("current_note", currentNote)
+          });
+        } else {
+          currentNote = {content: "", created_at: (new Date(currentDate)).getTime(), key: notes.length};
+          intent$.onNext(function (state) {
+            return state.pivot()
+              .set("current_note", currentNote)
+          });
+        }
+      });
+
+    action$
+      .filter(function(action) { return action.type == "new linebreak"; })
+      .subscribe(function (action) {
+        currentNote.content += "\n";
+        intent$.onNext(function (state) {
+          return state.pivot()
+            .set("current_note", currentNote)
+        });
+      });
+
+    action$
+      .filter(function(action) { return action.type == "new textline"; })
+      .subscribe(function (action) {
+        currentNote.content += action.payload + "\n";
+        intent$.onNext(function (state) {
+          return state.pivot()
+            .set("current_note", currentNote)
+        });
+      });
+
+    action$
+      .filter(function(action) { return action.type == "new year"; })
+      .subscribe(function (action) {
+        currentDate.setYear(parseInt(action.payload));
+        currentNote.created_at = (new Date(currentDate)).getTime();
+        intent$.onNext(function (state) {
+          return state.pivot()
+            .set("current_note", currentNote)
+        });
+      });
+
+    action$
+      .filter(function(action) { return action.type == "new month"; })
+      .subscribe(function (action) {
+        currentDate.setMonth(getMonthNumber(action.payload));
+        currentNote.created_at = (new Date(currentDate)).getTime();
+        intent$.onNext(function (state) {
+          return state.pivot()
+            .set("current_note", currentNote)
+        });
+      });
+
+    action$
+      .filter(function(action) { return action.type == "new date"; })
+      .subscribe(function (action) {
+        currentDate.setDate(parseInt(action.payload));
+        currentNote.created_at = (new Date(currentDate)).getTime();
+        intent$.onNext(function (state) {
+          return state.pivot()
+            .set("current_note", currentNote)
+        });
+      });
+
+
+    // Main view
+
+    action$
+      .filter(function (action) { return action.type == EDIT; })
+      .subscribe(function (action) {
+        intent$.onNext(function (state) {
+          return state.pivot().note.set("content", action.payload.content);
+        });
+      });
+
+    action$
+      .filter(function (action) { return action.type == SUBMIT; })
+      .subscribe(function (action) {
+        intent$.onNext(function (state) {
+          return state.pivot()
+            .set("lines", action.payload.content.split("\n"));
+        });
+        parseLines(action.payload.content.split("\n"));
+      });
+  };
+</script>

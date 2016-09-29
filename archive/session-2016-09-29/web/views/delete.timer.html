@@ -1,0 +1,82 @@
+<link rel="import" href="views.html">
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../models/content.html">
+<link rel="import" href="../events/events.html">
+<!-- <link rel="import" href="../events/model.html"> -->
+<!-- <link rel="import" href="../events/keys.html"> -->
+<link rel="import" href="../utils/shortcut.html">
+
+<script>
+  views.timer = function (options) {
+    var action = "Старт";
+    var active = false;
+    var timerTimeout;
+    var time = {
+      started: new Date(),
+      stopped: this.started,
+      elapsed: 0
+    };
+
+    function handleClick () {
+      toggleTimer();
+    }
+
+    function toggleTimer () {
+      active = !active;
+      action = !active ? "Старт" : "Стоп";
+      if (active) {
+        time.started = new Date();
+        time.stopped = time.started;
+        time.elapsed = 0;
+        timerTimeout = timerTick();
+        exportTimerAction(true);
+      } else {
+        clearTimeout(timerTimeout);
+        exportTimerAction(false);
+      }
+    }
+
+    function exportTimerAction(status) {
+      events.Action.onNext({
+        type: status ? events.Keys.TIMER_START : events.Keys.TIMER_STOP,
+        payload: time
+      });
+    }
+
+    function timerTick() {
+      time.stopped = new Date();
+      time.elapsed = time.stopped - time.started;
+      options.projector.scheduleRender();
+      timerTimeout = setTimeout(timerTick, 10);
+    }
+
+
+    return {
+      renderMaquette: function () {
+        return vendors.maquette.h("timer",
+          {
+            classes: {active: active}
+          },
+          [
+            vendors.maquette.h("time", [time.elapsed]),
+            vendors.maquette.h("button", {onclick: handleClick}, [action])
+          ]);
+      }
+    }
+  }
+</script>
+
+<style>
+  timer {
+    display: block;
+  }
+
+  timer time {
+    display: block;
+  }
+
+  timer button {
+    /*display: block;*/
+    cursor: pointer;
+  }
+</style>

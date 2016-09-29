@@ -1,0 +1,112 @@
+<script>
+  var logic = logic || {};
+  logic.note = function (options) {
+    var options =  Object.assign({
+      getPivotedModel: function (state) {
+          return state.pivot().blur[state.focus];
+      },
+      getPivotedWorkspace: function (state) {
+        return state.pivot();
+      },
+      events: null,
+    }, options);
+
+    var action$ = options.events.Action;
+    var intent$ = options.events.Intent;
+    var EDIT = options.events.Keys.NOTE_EDIT;
+
+    action$.filter(function (action) {
+      return action.type == EDIT;
+    }).subscribe(function (action) {
+      intent$.onNext(function (state) {
+        var s1 = options.getPivotedModel(state)
+          .set("content", action.payload.content);
+        var s2 = options.getPivotedModel(s1)
+          .set("updated_at", (new Date()).getTime());
+        return s2;
+      });
+    });
+
+    // events.Action.subscribe(function (action) {
+    //   switch(action.type) {
+
+    //     // Things
+
+    //     case events.Keys.NOTE_EDIT:
+    //       // effect
+    //       storageEffectSave(workspace.key + "/blur/" + workspace.focus + "/content", action.payload);
+    //       // model
+    //       events.Intent.onNext(function (state) {
+    //         return state
+    //           .set("blur",
+    //             state.blur.set(state.focus,
+    //               state.blur[state.focus].set("content", action.payload)));
+    //       });
+    //       break;
+
+    //     // User
+
+    //     case events.Keys.NEW_CONTENT:
+    //       // effect
+    //       var content = {content: ""};
+    //       content.key = storageEffectNewContent(workspace.key, content);
+    //       // model
+    //       events.Intent.onNext(function (state) {
+    //         if (!state.blur[state.focus].content) {
+    //           console.warn("current content is empty and you want new. Possibly storage memory leak.");
+    //         }
+    //         return state
+    //           .set("focus", content.key)
+    //           .set("blur",
+    //             state.blur.set(content.key, content));
+    //       });
+    //       break;
+
+    //     case events.Keys.PREV_CONTENT:
+    //       // effect
+    //       var contentKeys = Object.keys(workspace.blur);
+    //       contentKeys.splice(contentKeys.indexOf(workspace.focus), 1);
+    //       var randomContentKey = contentKeys[parseInt(Math.random() * contentKeys.length)];
+    //       storageEffectSave(workspace.key + "/focus", randomContentKey);
+    //       // model
+    //       events.Intent.onNext(function (state) {
+    //         return state.set("focus", randomContentKey);
+    //       });
+    //       break;
+
+    //     // System
+
+    //     case events.Keys.WORKSPACE_LOAD:
+    //       if (!action.payload) {
+    //         // effect
+    //         events.Action.onNext({
+    //           type: events.Keys.NEW_CONTENT
+    //         });
+    //       } else {
+    //         if (!action.payload.blur[action.payload.focus]) {
+    //           // effect
+    //           console.warn("focus have non-existing content. Making new");
+    //           var content = {content: ""};
+    //           content.key = storageEffectNewContent(workspace.key, content);
+    //           var blur = Object.assign({}, action.payload.blur);
+    //           blur[content.key] = content;
+    //           // model
+    //           events.Intent.onNext(function (state) {
+    //             return state
+    //               .set("focus", content.key)
+    //               .set("blur", blur);
+    //           })
+    //         } else {
+    //           // model
+    //           events.Intent.onNext(function (state) {
+    //             return state
+    //               .set("focus", action.payload.focus)
+    //               .set("blur", action.payload.blur);
+    //           });
+    //         }
+    //       }
+    //       break;
+    //   }
+    // });
+  };
+</script>

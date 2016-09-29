@@ -1,0 +1,21 @@
+<script>
+  var models = models || {samples: {}};
+
+  models.samples.content = {
+    type: "content", key: "contentid1",
+    content: "My content"
+  };
+
+  models.samples.content_dictionary = {
+    contentid1: models.samples.content,
+  };
+
+  models.samples.content_workspace = {
+    blur: models.samples.content_dictionary,
+    focus: "contentid1"
+  };
+
+  models.Content = function (content) {
+    this.content = content;
+  }
+</script>

@@ -1,0 +1,17 @@
+<link rel="import" href="../models/list.html">
+<link rel="import" href="../views/list.html">
+<link rel="import" href="standalone.html">
+<script>
+  var modules = modules || {};
+  modules.list = function (options) {
+    return {
+      createStandalone: function () {
+        return modules.createStandalone({
+          model: models.samples.list,
+          logic: function () {},
+          view: views.list,
+        });
+      }
+    };
+  };
+</script>

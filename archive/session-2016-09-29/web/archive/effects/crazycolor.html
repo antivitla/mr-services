@@ -1,0 +1,12 @@
+<link rel="import" href="effects.html">
+<script>
+  Effects.crazycolor = function (sources) {
+    function randomColor () {
+      return parseInt(Math.random()*200 + 30);
+    }
+    sources.DOM.style.color = String("rgba(" +
+      randomColor() + "," +
+      randomColor() + "," +
+      randomColor() + ", 1");
+  }
+</script>

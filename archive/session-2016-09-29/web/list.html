@@ -1,0 +1,42 @@
+<link rel="stylesheet" href="assets/desk.css">
+<link rel="import" href="modules/list.html">
+
+<desk class="items"></desk>
+
+<columns class="debug">
+  <column>
+    <pre class="action-stream" style="color: crimson;"></pre>
+  </column>
+  <column>
+    <pre class="model-stream" style="color: steelblue;"></pre>
+  </column>
+</columns>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var app = modules.list().createStandalone();
+    app.start(document.querySelector("desk"));
+
+    app.events.Action.subscribe(function (action) {
+      document.querySelector(".debug .action-stream")
+        .innerHTML = "Action: " + JSON.stringify(action, null, 2);
+      // console.log("%cNote Action: " + JSON.stringify(action, null, 2), "color: orangered");
+    });
+    app.events.Model.subscribe(function (model) {
+      document.querySelector(".debug .model-stream")
+        .innerHTML = "Model: " + JSON.stringify(model, null, 2);
+      // console.log("%cNote Model: " + JSON.stringify(model.blur[model.focus], null, 2), "color: gray");
+    });
+
+  });
+</script>
+
+<!-- <div id="qunit"></div>
+<div id="qunit-mixture"></div>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.0.css">
+<script src="https://code.jquery.com/qunit/qunit-2.0.0.js"></script>
+<script>
+  QUnit.test("no errors", function(assert) {
+    assert.ok(true == true);
+  });
+</script> -->

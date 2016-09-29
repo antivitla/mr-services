@@ -1,0 +1,187 @@
+<link rel="stylesheet" href="../textarea.css">
+
+<style>
+  textarea {
+    height: 50vh;
+  }
+</style>
+
+<app>
+  <focus>
+    <!-- <note>
+      <textarea placeholder="Пиши - не пиши, всё одно.."></textarea>
+    </note> -->
+  </focus>
+  <blur>
+    <!-- <note>
+      <p>А это вручную заметка написанная тут. Чем плохо?</p>
+    </note>
+    <note>
+      <p>Хочется добавить автоматическое добавление заметки в список (не писать теги. И (авто)сохранение присобачить.</p>
+    </note> -->
+  </blur>
+</app>
+
+<script>
+
+  // Добавляем сложности
+  // - новое отображение списка заметок
+  // - по клику на заметку - редактируем и возвращаем на место
+  // врукопашную сейчас это добавить сложно...
+
+
+
+
+  // Dictionary
+  var app = document.querySelector("app");
+
+  // load saved
+
+    // initial view
+    var model = loadModel("model");
+    viewModel(model, app);
+
+  // edit
+
+    // when editing is finished
+    app.addEventListener("finished", function (event) {
+      // save to list
+      blurNote(changeNoteMode(this.querySelector("focus note"), "view"));
+      modelBlurFocusedNote();
+      // new empty note set current
+      focusNote(createNote("", "edit"));
+      modelFocusNewNote();
+      // persist data
+      saveModel(model, "model");
+    });
+
+  // save editing
+  var editInterval,
+    delay = 200;
+
+  app.addEventListener("edit", function (event) {
+    model.focus.note.text = event.target.value;
+    clearTimeout(editInterval);
+    editInterval = setTimeout(function () {
+      saveModel(model, "model");
+    }, delay);
+  });
+
+  //
+  // Logic
+  //
+
+  // prepend note to blur
+  function blurNote (note) {
+    app.querySelector("blur").appendChild(note);
+  }
+
+  function modelBlurFocusedNote () {
+    model.blur.push(model.focus.note);
+    delete model.focus.note;
+  }
+
+  // set note to current editable
+  function focusNote (note) {
+    var focus = app.querySelector("focus");
+    focus.innerHTML = "";
+    focus.appendChild(note);
+    setTimeout(function () {
+      focus.querySelector("textarea").focus();
+    });
+  }
+
+  function modelFocusNewNote () {
+    model.focus = {
+      note: {
+        text: ""
+      }
+    };
+  }
+
+  //
+  // Support
+  //
+
+  // create note from text
+  function createNote (text, mode) {
+    var noteElement = document.createElement("note");
+    if (mode != "edit") {
+      noteElement.innerHTML = "<p>" + text +"</p>";
+    } else {
+      noteElement.innerHTML = "<textarea>" + text + "</textarea>"
+    }
+    return noteElement;
+  }
+
+  // check shortcut
+  var Shortcut = {
+    "ctrl+enter": function (event, callback) {
+      if (event.ctrlKey && event.keyCode == 13) {
+        callback(event);
+      }
+    }
+  }
+
+  // change mode
+  function changeNoteMode (note, mode) {
+    if (mode == "view") {
+      note.innerHTML = "<p>" + note.querySelector("textarea").value + "</p>";
+    }
+    else if (mode == "edit") {
+      note.innerHTML = "<textarea>" + note.textContent + "</textarea>";
+    }
+    return note;
+  }
+
+  // load model
+  function loadModel (key) {
+    var item = localStorage.getItem(key);
+    if (item) {
+      return JSON.parse(localStorage.getItem(key));
+    } else {
+      return {
+        focus: {note: {text: ""}},
+        blur: []
+      };
+    }
+  }
+
+  // save model
+  function saveModel (model, key) {
+    localStorage.setItem(key, JSON.stringify(model));
+  }
+
+  // view model
+  function viewModel (model, app) {
+    var focus = app.querySelector("focus");
+    var blur = app.querySelector("blur");
+    focus.innerHTML = "";
+    focus.appendChild(createNote(model.focus.note.text, "edit"));
+    blur.innerHTML = "";
+    model.blur.forEach(function (item) {
+      blurNote(createNote(item.text, "view"));
+    });
+  }
+
+  //
+  // convert raw events
+  //
+
+  // ctrl+enter
+  app.addEventListener("keydown", function (event) {
+    Shortcut["ctrl+enter"](event, function (event) {
+      event.target.dispatchEvent(new CustomEvent("finished", { bubbles: true }));
+    });
+  });
+
+  // just edit (bounce 500)
+  app.querySelector("focus").addEventListener("change", function (event) {
+    event.target.dispatchEvent(new CustomEvent("edit", { bubbles: true }));
+  });
+
+  app.querySelector("focus").addEventListener("keyup", function (event) {
+    event.target.dispatchEvent(new CustomEvent("edit", { bubbles: true }));
+  });
+
+</script>

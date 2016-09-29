@@ -1,0 +1,11 @@
+<link rel="import" href="effects.html">
+<script>
+  Effects.log = function (sources, payload) {
+    if (sources) {
+      const div = document.createElement("div");
+      div.innerHTML = JSON.stringify(payload);
+      sources.DOM.appendChild(div)
+    }
+    console.log(payload);
+  };
+</script>

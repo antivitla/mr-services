@@ -1,0 +1,19 @@
+<link rel="import" href="../storage/storage.html">
+<script>
+    var logic = logic || {};
+    logic.journal = function (options) {
+      var options =  Object.assign({
+        getPivotedModel: function (state) {
+            return state.pivot().blur[state.focus];
+        },
+        getPivotedWorkspace: function (state) {
+          return state.pivot();
+        },
+        events: null,
+      }, options);
+
+      var action$ = options.events.Action;
+      var intent$ = options.events.Intent;
+
+    };
+</script>

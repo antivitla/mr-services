@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="assets/desk.css">
+<link rel="import" href="modules/journal.html">
+
+<desk class="journal"></desk>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var journalApp = modules.journal().createStandalone();
+    journalApp.start(document.querySelector("desk.journal"));
+
+    // journalApp.events.Action.subscribe(function (action) {
+    //   document.querySelector("debug events.journal pre.action")
+    //     .innerHTML = "Action: " + JSON.stringify(action, null, 2);
+    //   // console.log("%cJournal Action: " + JSON.stringify(action, null, 2), "color: firebrick");
+    // });
+    // journalApp.events.Model.subscribe(function (model) {
+    //   document.querySelector("debug events.journal pre.model")
+    //     .innerHTML = "Model: " + JSON.stringify(model, null, 2);
+    //   // console.log("%cJournal Model: " + JSON.stringify(model.blur[model.focus], null, 2), "color: yellow");
+    // });
+  });
+</script>
+
+<!-- <div id="qunit"></div>
+<div id="qunit-mixture"></div>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.0.css">
+<script src="https://code.jquery.com/qunit/qunit-2.0.0.js"></script>
+<script>
+  QUnit.test("no errors", function(assert) {
+    assert.ok(true == true);
+  });
+</script> -->

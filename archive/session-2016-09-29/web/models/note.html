@@ -1,0 +1,22 @@
+<script>
+  var models = models || {samples: {}};
+
+  models.samples.note = {
+    type: "note", key: "noteid1",
+    content: "Заметочка моя"
+  };
+
+  models.samples.note_empty = {
+    type: "note",
+    content: ""
+  };
+
+  models.samples.note_dictionary = {
+    noteid1: models.samples.note
+  };
+
+  models.samples.note_workspace = {
+    blur: models.samples.note_dictionary,
+    focus: "noteid1"
+  };
+</script>

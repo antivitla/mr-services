@@ -1,0 +1,56 @@
+<style>
+  textarea {
+    box-sizing: border-box;
+    border: solid #eee 1px;
+    width: 100%;
+    border-radius: 3px;
+    font-family: monospace;
+    display: block;
+    line-height: 1.5;
+    padding: 0 5px;
+    height: 100%;
+    outline: none;
+    opacity: 1;
+    transition: all 1.0s;
+    font-size: x-large;
+  }
+
+  preloader {
+    background: url(http://mr-woodman.ru/timer/images/cat-preloader.gif) no-repeat center center;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 200px;
+    height: 140px;
+    margin-left: -100px;
+    margin-right: -70px;
+    transition: all 0.4s;
+    opacity: 1;
+    font-size: x-large;
+    text-align: center;
+  }
+
+  preloader:before {
+    /*content: "Лижем лапу..";*/
+  }
+</style>
+
+<div id="app">
+  <preloader></preloader>
+</div>
+
+<!-- <textarea></textarea> -->
+
+<!-- <script src="./jspm_packages/system.js"></script>
+<script src="./config.js"></script>
+<script>
+  // System.import("./textarea.js")
+  System.import("./update.js")
+</script> -->
+<script type="text/javascript" src="utils/update.js"></script>
+
+
+
+
+

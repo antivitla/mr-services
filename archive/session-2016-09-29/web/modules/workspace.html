@@ -1,0 +1,20 @@
+<link rel="import" href="../models/note.html">
+<link rel="import" href="../logic/workspace.html">
+<link rel="import" href="../views/workspace.html">
+<link rel="import" href="standalone.html">
+<link rel="import" href="../storage/storage.html">
+<script>
+  var modules = modules || {};
+  modules.workspace = function (options) {
+    return {
+      createStandalone: function () {
+        return modules.createStandalone({
+          model: models.samples.workspace_workspace,
+          logic: logic.workspace,
+          view: views.workspace,
+          type: "workspace"
+        });
+      }
+    };
+  };
+</script>

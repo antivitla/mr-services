@@ -1,0 +1,109 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="../assets/tree.css">
+<link rel="import" href="../vendors/maquette.html">
+<link rel="import" href="../utils/all.html">
+<link rel="import" href="../models/tree.html">
+
+<script>
+  var views = views || {};
+  views.tree = function (options) {
+    var options = Object.assign({}, {
+      getModel: function (state) {
+        return state.blur[state.focus];
+      },
+      getDictionary: function (state) {
+        return state.blur;
+      },
+      events: null,
+      projector: null,
+      packed: true,
+    }, options);
+
+    var model$ = options.events.Model;
+    var action$ = options.events.Action;
+    var CONTEXT_SWITCH = options.events.Keys.TREE_CONTEXT_SWITCH;
+    var BACK = options.events.Keys.TREE_BACK;
+
+    // model
+
+    var tree = models.samples.tree;
+    var dictionary = models.samples.tree_dictionary;
+
+    model$.subscribe(function (state) {
+      tree = options.getModel(state).toJS();
+      dictionary = options.getDictionary(state).toJS();
+    });
+
+    // view
+
+    function unpackTree (event) {
+      options.packed = false;
+      if (this.classList.contains("packed")) {
+        action$.onNext({
+          type: CONTEXT_SWITCH,
+          payload: this.id
+        });
+      }
+    };
+
+    function packTree (event) {
+      // options.packed = true;
+      action$.onNext({
+        type: CONTEXT_SWITCH,
+        payload: BACK
+      });
+    }
+
+    function makeTree () {
+      console.log("Make tree!");
+    }
+
+    function editMode () {
+      console.log("Edit mode!");
+    }
+
+    function shortMaquette () {
+      return [tree.content];
+    }
+
+    function fullMaquette () {
+      var subtree = [];
+      if (tree.tree) {
+        Object.keys(tree.tree).forEach(function (item) {
+          subtree.push(dictionary[item]);
+        });
+      }
+      return [
+        vendors.maquette.h("context.action.top.left", {
+          onclick: packTree,
+          id: tree.key
+        }, [tree.content]),
+        vendors.maquette.h("tree", subtree.map(function (item) {
+          return vendors.maquette.h(item.type, {
+            classes: {packed: (item.type == "tree")},
+            onclick: (item.type == "tree" ? unpackTree : makeTree),
+            key: item.key,
+            id: item.key
+          }, [item.content]);
+        })),
+        (tree.draft ? vendors.maquette.h("draft", [tree.draft.map(function (item) {
+          return vendors.maquette.h("div", [item]);
+        })]) : ""),
+
+      ];
+    }
+
+    return {
+      renderMaquette: function () {
+        return vendors.maquette.h("tree", {
+          classes: {
+            packed: options.packed
+          },
+          onclick: unpackTree,
+          key: tree.key,
+          id: tree.key
+        }, options.packed ? shortMaquette() : fullMaquette());
+      },
+    };
+  };
+</script>

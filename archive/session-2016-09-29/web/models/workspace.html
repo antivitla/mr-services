@@ -1,0 +1,29 @@
+<script>
+  var models = models || {samples: {}};
+
+  models.samples.workspace = {
+    key: "workspaceid1",
+    content: "Workspace",
+    context: "contextid1"
+  };
+
+  models.samples.workspace_dictionary = {
+    contextid1: {
+      key: "contextid1",
+      content: "My Context"
+    },
+    workspaceid1: models.samples.workspace,
+  };
+
+  models.samples.workspace_workspace = {
+    blur: models.samples.workspace_dictionary,
+    focus: "workspaceid1",
+  };
+
+
+  models.Workspace = function (content) {
+    this.blur = {};
+    this.blur[content.key] = content;
+    this.focus = content;
+  };
+</script>

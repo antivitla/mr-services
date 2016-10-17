@@ -1,0 +1,50 @@
+/*	Theme: Space */
+
+*[theme="space"] {
+	background-color: #443532;
+	color: rgba(194, 186, 148, 0.8);
+}
+
+*[theme="space"] input[type="text"] {
+	border-color: rgba(194, 186, 148, 0.2);
+	height: 2.5rem;
+}
+
+*[theme="space"] a {
+	color: rgba(103, 170, 176, 1.0); /* 83c7cd; rgba(131, 199, 205, 1.0) */
+	text-decoration: none;
+	border-bottom: solid rgba(103, 170, 176, 0.5) 1px;
+}
+
+*[theme="space"] #theme {
+	background-image: url(../images/lonely-by-dracoimagem.png);
+}
+
+/* 	Something-input */
+
+*[theme="space"] something-input textarea {
+	color: rgba(194, 186, 148, 0.8);
+	resize: none;
+}
+
+/*
+*[theme="space"] something-input textarea:focus {
+	color: rgba(255, 255, 255, 0.8);
+}
+*/
+
+body[theme="space"]:after {
+	background-color: rgba(68, 53, 50, 0.8);
+}
+
+/* 	Toggle lang */
+
+*[theme="space"] #lang {
+	width: 30px;
+	text-transform: uppercase;
+}
+
+*[theme="space"] toggle-option#lang[name="lang"] option {
+	display: inline;
+	border-bottom: solid rgba(194, 186, 148, 0.5) 1px;
+}

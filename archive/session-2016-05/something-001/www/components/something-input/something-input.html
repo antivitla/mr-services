@@ -1,0 +1,147 @@
+
+<!--
+
+	<something-input>
+
+	Поведение: это поле ввода (своеобразное), в котором мы создаем заметки, тудушки
+	и другую хрень. Самое важное и интересное про неё - что она добавляет их тупо
+	в дерево DOM над собой (@todo или в некий контейнер). При добавлении, запускает
+	от себя событие "add-something" по дереву DOM, которое можно поймать.
+
+	Она работает сама по себе без всяких привязок - достаточно бросить этот тег
+	на страницу, и заметки будут добавляться над ней по Ctrl+Enter внутри поля ввода.
+
+	@todo проверка на пустоту
+
+
+ -->
+
+
+<link rel="import" href="../autosize-import/autosize-import.html">
+<link rel="import" href="../toggle-option/toggle-option.html">
+
+<template>
+	<option value="note" ru="Заметка" en="Note">Заметка</option>
+	<option value="idea" ru="Идея" en="Idea">Идея</option>
+	<option value="problem" ru="Проблема" en="Problem">Проблема</option>
+	<option value="task" ru="Задача" en="Task">Задача</option>
+</template>
+
+<link rel="stylesheet" href="something-input.css">
+
+<script>
+	(function () {
+		var prototype = Object.create(HTMLElement.prototype),
+			template = document.querySelector("link[href*='something-input.html']")
+				.import.querySelector("template");
+
+		prototype.createdCallback = function () {
+			// Добавляем поле ввода
+			// this.appendChild(document.createElement("textarea"));
+			// Добавляем опции
+			// var toggleType = document.createElement("toggle-option");
+			// toggleType.setAttribute("name", "type");
+			// toggleType.appendChild(template.content.cloneNode(true));
+			// this.appendChild(toggleType);
+		};
+
+		prototype.attachedCallback = function () {
+			var textarea = this.querySelector("textarea");
+			if (!textarea) {
+				textarea = document.createElement("textarea");
+				this.appendChild(textarea);
+			}
+			if (window["autosize"]) {
+				autosize(textarea);
+			};
+			bindEvents(this);
+			setFocused(textarea);
+		};
+
+		document.registerElement("something-input", { prototype: prototype });
+
+		function bindEvents (somethingInput) {
+			somethingInput.addEventListener("mouseenter", function () {
+				setFocused(this.querySelector("textarea"));
+			});
+
+			// somethingInput.addEventListener("mouseleave", function () {
+			// 	var textarea = this.querySelector("textarea");
+			// 	// textarea.blur();
+			// });
+
+			somethingInput.addEventListener("keydown", function (event) {
+				// Ввод заметки при Ctrl+Enter
+				if (event.keyCode == "13") {
+					if (event.ctrlKey) {
+						addSomething(this, document.querySelector(this.getAttribute("for")) || undefined);
+					}
+				}
+			});
+
+			// somethingInput.addEventListener("toggle-option", function (event) {
+			// 	this.setAttribute("type", event.detail.value);
+			// 	setFocused(this.querySelector("textarea"));
+			// });
+		}
+
+		function addSomething (somethingInput, targetContainer) {
+			var textarea = somethingInput.querySelector("textarea"),
+				newSomethingType = somethingInput.getAttribute("type") || "note",
+				newSomethingElement = document.createElement(newSomethingType);
+
+			// Проверка на пустоту
+			if (!textarea.value.replace(/\s/g, "")) { return; }
+
+			// Разбиваем на параграфы и переносы строк
+			var paragraphs = textarea.value.split(String.fromCharCode(10) + String.fromCharCode(10)),
+				paragraphElement;
+			for (var i = 0; i < paragraphs.length; i++) {
+				paragraphs[i] = paragraphs[i].split(String.fromCharCode(10)).join("<br>").replace(/^<br>|<br>$/, "");
+				if (paragraphs[i]) {
+					paragraphElement = document.createElement("p");
+					paragraphElement.innerHTML = paragraphs[i];
+					newSomethingElement.appendChild(paragraphElement);
+				}
+			}
+
+			// Теперь добавляем заметку/что-то в целевой контейнер. Если его нет,
+			// добавляем над вводом
+			if (targetContainer) {
+				targetContainer.appendChild(newSomethingElement);
+			} else {
+				somethingInput.parentElement.insertBefore(newSomethingElement, somethingInput);
+			}
+
+			// Пошлем событие добавления нового элемента в любом случае
+			// dispatchAddSomethingEvent ((targetContainer ? targetContainer : somethingInput), newSomethingElement);
+
+			// Обновим текстарию (заменим на новую)
+			var newTextarea = document.createElement("textarea");
+			replaceElement(somethingInput.querySelector("textarea"), newTextarea);
+			if (window["autosize"]) { autosize(newTextarea); }
+			setFocused(newTextarea);
+		}
+
+		function dispatchAddSomethingEvent (eventTarget, newSomethingElement) {
+			eventTarget.dispatchEvent(new CustomEvent("something-created", {
+				detail: {
+					somethingElement: newSomethingElement
+				},
+				bubbles: true,
+				cancelable: true
+			}));
+		}
+
+		function replaceElement (source, target) {
+			source.parentElement.insertBefore(target, source);
+			source.remove();
+		}
+
+		function setFocused (textarea) {
+			textarea.selectionStart = textarea.value ? textarea.value.length : 0;
+			textarea.focus();
+		}
+
+	}());
+</script>

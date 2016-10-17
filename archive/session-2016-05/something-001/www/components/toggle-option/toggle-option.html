@@ -1,0 +1,139 @@
+
+<!--
+
+	<toggle-option>
+
+	Это специальная штуковина чтобы переключать атрибут у кого-то (выросла
+	из этой идеи). Навроде чекбокса или селекта. Мы перещелкиваем некие заданные
+	внутри неё опции, элемент генерит событие переключения, но самое главное и
+	интересное - что можно задать селектор элемента, которому он будет выставлять
+	значение опции.
+
+	Выставляет он значение в атрибут,  название которого пишется в теге <toggle-option>
+	в атрибуте "name".
+
+	Смысл - быстрое создание например переключения языка или темы (визуальной).
+	Например, имея такой тег на странице:
+
+		<toggle-option name="lang" for="html">
+			<option value="ru">Русский</option>
+			<option value="en">English</option>
+			<option value="fr">Francaise</option>
+		</toggle-option>
+
+	По умолчанию при парсинге элемента выставляется выбранной первая опция. Выбранность
+	выглядит как атрибут selected:
+
+		<option value="ru" selected="true">Русский</option>
+
+	Внутри переключателя (так как он видим на странице), будет видна текущая выбранная
+	опция - слова внутри <option> - то есть "Русский". При клике на него - по кругу
+	будут переключаться	другие языки - англ, франц, и т.д.
+
+	Так вот, самое важное - в момент переключения наш тег поищет элемент с селектором
+	указанным в опциональном атрибуте for - в данном случае "html" (может быть любой CSS селектор,
+	даже сложный) и выставлять будет ему в атрибут "lang" значение "ru" или "en" или
+	что другое, что указано как value в <option> переключателя.
+
+	Получится что наш переключатель тогглит документ в <html lang="ru"> или
+	<html lang="en"> или <html lang="fr"> и так далее.
+
+	А цель всего этого - написанные стили для того или иного значения опции - смена
+	языка, оформления или чего-то ещё. Ну и события можно ловить.
+
+ -->
+
+<link rel="stylesheet" href="toggle-option.css">
+
+<script>
+	(function () {
+
+		var prototype = Object.create(HTMLElement.prototype);
+
+		prototype.createdCallback = function () {
+			bindEvents(this);
+		};
+
+		prototype.attachedCallback = function () {
+			var options = this.querySelectorAll("option");
+			for (var i = 0; i < options.length; i++) {
+				options[i].setAttribute("index", i);
+			}
+			var self = this;
+			setTimeout(function () {
+				self.select(0);
+			},1);
+		};
+
+		prototype.select = function (idOrValue) {
+			var option;
+			switch (typeof idOrValue) {
+				case "number":
+					this.selectById(idOrValue);
+					break;
+				case "string":
+					this.selectByValue(idOrValue);
+					break;
+				default:
+					break;
+			}
+		};
+
+		prototype.selectById = function (id) {
+			var option = this.querySelectorAll("option")[id];
+			if (option) {
+				while (this.querySelector("option[selected]")) {
+					this.querySelector("option[selected]").removeAttribute("selected");
+				}
+				option.setAttribute("selected", true);
+				dispatchToggleOptionEvent(this, option);
+				toggleTargets(this, option);
+			}
+		};
+
+		prototype.selectByValue = function (val) {
+			var option = this.querySelector("option[value='" + val + "']");
+			if (option) {
+				while (this.querySelector("option[selected]")) {
+					this.querySelector("option[selected]").removeAttribute("selected");
+				}
+				option.setAttribute("selected", true);
+				dispatchToggleOptionEvent(this, option);
+				toggleTargets(this, option);
+			}
+		};
+
+		document.registerElement("toggle-option", { prototype: prototype });
+
+		function bindEvents (toggleOption) {
+			toggleOption.addEventListener("click", function () {
+				var current = this.querySelector("option[selected]"),
+					next = current.nextElementSibling || this.querySelector("option");
+				this.selectByValue(next.getAttribute("value"));
+			});
+		}
+
+		function dispatchToggleOptionEvent (toggleOption, option) {
+			toggleOption.dispatchEvent(new CustomEvent("toggle-option", {
+				detail: {
+					name: toggleOption.getAttribute("name"),
+					value: option.getAttribute("value"),
+					index: parseInt(option.getAttribute("index"))
+				},
+				bubbles: true,
+				cancelable: true
+			}));
+		}
+
+		function toggleTargets (toggleOption, option) {
+			var targetSelector = toggleOption.getAttribute("for");
+			if (targetSelector) {
+				var targets = document.querySelectorAll(targetSelector);
+				for (i = 0; i < targets.length; i++) {
+					targets[i].setAttribute(toggleOption.getAttribute("name"), option.getAttribute("value"));
+				}
+			}
+		}
+
+	}());
+</script>

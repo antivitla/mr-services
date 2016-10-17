@@ -1,0 +1,93 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+
+<dom-module id="mr-time">
+	<style>
+		:host {
+			-webkit-font-smoothing: antialiased;
+			text-rendering: optimizeLegibility;
+		}
+
+		divider {
+			margin: 0 0.1em;
+			@apply(--mr-time-divider);
+		}
+
+		@-moz-keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		@-webkit-keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		@keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		:host.current-time divider {
+			-moz-animation: tick 1s infinite;
+			-webkit-animation: tick 1s infinite;
+			animation: tick 1s infinite;
+		}
+	</style>
+
+	<template><mr-hours id="hours"></mr-hours><divider>:</divider><mr-minutes id="minutes"></mr-minutes></template>
+
+	<script>
+		Polymer({
+			is: "mr-time",
+			properties: {
+				value: {
+					type: Number,
+					observer: "_valueChanged"
+				}
+			},
+
+			ready: function () {
+				this._switchBehavior(this.value);
+			},
+
+			_valueChanged: function (newValue) {
+				this._switchBehavior(newValue);
+			},
+
+			_switchBehavior: function (value) {
+				if (this._timeout) {
+					clearTimeout(this._timeout);
+				}
+
+				if (!value) {
+					this.toggleClass("current-time", true);
+					this._tick(200);
+				} else {
+					this.toggleClass("current-time", false);
+					this._renderTime(value);
+				}
+			},
+
+			_renderTime: function (ms) {
+				var date = new Date(ms);
+				this.$.hours.textContent = ("0" + date.getHours()).slice(-2);
+				this.$.minutes.textContent = ("0" + date.getMinutes()).slice(-2);
+			},
+
+			_tick: function (delay) {
+				if (this._timeout) {
+					clearTimeout(this._timeout);
+				}
+
+				this._timeout = setTimeout(function () {
+					this._renderTime((new Date()).getTime());
+					this._tick(200);
+				}.bind(this), (delay ? delay : 200));
+			}
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,57 @@
+
+<link rel="import" href="../something-load/something-load.html">
+
+<script>
+	(function () {
+
+		var prototype = Object.create(HTMLElement.prototype);
+
+		prototype.createdCallback = function () {
+			if (this.getAttribute("uid")) {
+				var load = document.createElement("something-load");
+				load.setAttribute("uid", this.getAttribute("uid"));
+				this.appendChild(load);
+				console.log(this);
+			}
+		};
+
+		prototype.attachedCallback = function () {
+			var element = this,
+				observer = new MutationObserver(function (mutations) {
+				mutations.forEach(function (mutation) {
+					check(mutation, element);
+				});
+			});
+
+			observer.observe(element, {
+				childList: true
+			});
+		};
+
+		document.registerElement("something-persist", { prototype: prototype });
+
+		function check (mutation, parent) {
+			console.dir(mutation.addedNodes);
+			Array.prototype.slice.call(mutation.addedNodes).forEach(function (node) {
+				if (node.nodeName != "#text") {
+					saveNode(node, parent);
+				}
+			});
+		}
+
+		function generateUID (somethingElement) {
+			return "something@" + String((new Date()).getTime()) + String(parseInt(Math.random()*100000));
+		}
+
+		function saveNode (node, parent) {
+			var id = generateUID(),
+				parentId = parent ? parent.getAttribute("uid") : null;
+			localStorage.setItem(id, node.outerHTML);
+			if (parentId) {
+				localStorage.setItem(parentId, (localStorage.getItem(parentId) || "") +
+					"<something-load uid='" + id + "'></something-load>");
+			}
+		}
+
+	}());
+</script>

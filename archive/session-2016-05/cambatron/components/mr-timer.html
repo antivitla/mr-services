@@ -1,0 +1,190 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="mr-date-behavior.html">
+<link rel="import" href="mr-duration-behavior.html">
+<link rel="import" href="mr-hour.html">
+<link rel="import" href="mr-minute.html">
+<link rel="import" href="mr-second.html">
+
+<dom-module id="mr-timer">
+	<style>
+		:host *:not([hidden]) ~ mr-minute[format*="min"] {
+			margin-left: 0.2em;
+		}
+
+		:host *:not([hidden]) ~ mr-second[format*="sec"] {
+			margin-left: 0.2em;
+		}
+	</style>
+
+	<template><mr-hour date="[[duration]]"></mr-hour><mr-minute date="[[duration]]"></mr-minute><mr-second date="[[duration]]"></mr-second></template>
+
+	<script>
+		Polymer({
+			is: "mr-timer",
+			properties: {
+				start: {
+					type: Date,
+					observer: "_startChanged"
+				},
+				stop: {
+					type: Date,
+					observer: "_stopChanged"
+				},
+				duration: {
+					type: Date,
+					reflectToAttribute: true,
+					computed: "computeDuration(start, stop)"
+				},
+				format: {
+					type: String,
+					value: "h:mm",
+					observer: "_formatChanged"
+				}
+			},
+
+			behaviors: [MrTickBehavior],
+
+			startTimer: function (date) {
+				if (this.ticking) {
+					this.untick();
+				}
+				this.start = date ? date : new Date();
+				this.setAttribute("start", this.start);
+				this.stop = undefined;
+				this.removeAttribute("stop");
+				this.tick(200, function (now) {
+					this.duration = now - this.start;
+
+				}.bind(this));
+			},
+
+			stopTimer: function (date) {
+				this.stop = date ? date : new Date();
+				this.setAttribute("stop", this.stop);
+				this.duration = date - this.start;
+				this.untick();
+			},
+
+			durationChanged: function () {
+				this._duration = new Date(this.duration);
+			},
+
+			computeDuration: function () {
+				var now = new Date();
+				return (this.stop ? (this.stop.getTime() > 0 ? this.stop : now) : now) - (this.start ? (this.start.getTime() > 0 ? this.start : now) : now);
+			},
+
+			_init: function () {
+				// Если дали только старт, стартуем
+				if (this.start.getTime() > 0 && this.stop.getTime() == 0) {
+					console.log("init start", this.stop - this.start);
+					this.startTimer(this.start);
+				}
+				// Если дали и старт и стоп - числим длительность
+				else if (this.start.getTime() > 0 && this.stop.getTime() > 0) {
+					console.log("init stop", this.stop - this.start);
+					this.stopTimer(this.stop);
+				}
+			},
+
+			_startChanged: function (start) {
+				// console.log("start ch", this.stop - start);
+				// if (!start || !this.stop) {
+				// 	console.log("_startChanged: %cundefined start or stop", "color: pink");
+				// 	return;
+				// }
+				// this._init();
+			},
+
+			_stopChanged: function (stop) {
+				// console.log("stop ch", stop - this.start);
+				// if (!this.start || !stop) {
+				// 	console.log("_stopChanged: %cundefined start or stop", "color: pink")
+				// 	return;
+				// }
+				// this._init();
+			},
+
+			_formatChanged: function (format) {
+				var seccheck = this._checkSeconds(format),
+					mincheck = this._checkMinutes(format),
+					hourcheck = this._checkHours(format);
+
+				if (hourcheck) {
+					this.querySelector("mr-hour").setAttribute("type", "duration");
+				} else if (!hourcheck && mincheck) {
+					this.querySelector("mr-minute").setAttribute("type", "duration");
+				} else if (!hourcheck && !mincheck && seccheck) {
+					this.querySelector("mr-second").setAttribute("type", "duration");
+				}
+			},
+
+			_checkSeconds: function (format) {
+				return this._checkUnit({
+					selector: "mr-second",
+					format: format,
+					check: function (format) {
+						if (format.match(/sseconds/)) { return {fmt:"sseconds", d:""}; }
+						else if (format.match(/seconds/)) { return {fmt:"seconds", d:""}; }
+						else if (format.match(/ssec/)) { return {fmt:"ssec", d:""}; }
+						else if (format.match(/sec/)) { return {fmt:"sec", d:""}; }
+						else if (format.match(/(^|\W)ss(\W|$)/)) { return {fmt:"ss", d:format.match(/(^|\W)ss(\W|$)/)[1]}; }
+						else if (format.match(/(^|\W)s(\W|$)/)) { return {fmt:"s", d:format.match(/(^|\W)s(\W|$)/)[1]}; }
+						else { return {fmt:"hidden", d:""}; }
+					}
+				});
+			},
+
+			_checkMinutes: function (format) {
+				return this._checkUnit({
+					selector: "mr-minute",
+					format: format,
+					check: function (format) {
+						if (format.match(/mminutes/)) { return {fmt:"mminutes", d:""}; }
+						else if (format.match(/minutes/)) { return {fmt:"minutes", d:""}; }
+						else if (format.match(/mmin/)) { return {fmt:"mmin", d:""}; }
+						else if (format.match(/min/)) { return {fmt:"min", d:""}; }
+						else if (format.match(/(^|\W)mm(\W|$)/)) { return {fmt:"mm", d:format.match(/(^|\W)mm(\W|$)/)[1]}; }
+						else if (format.match(/(^|\W)m(\W|$)/)) { return {fmt:"m", d:format.match(/(^|\W)m(\W|$)/)[1]}; }
+						else { return {fmt:"hidden", d:""}; }
+					}
+				});
+			},
+
+			_checkHours: function (format) {
+				return this._checkUnit({
+					selector: "mr-hour",
+					format: format,
+					check: function (format) {
+						if (format.match(/hhours/)) { return {fmt:"hhours", d:""}; }
+						else if (format.match(/hours/)) { return {fmt:"hours", d:""}; }
+						else if (format.match(/(^|\W)hh(\W|$)/)) { return {fmt:"hh", d:format.match(/(^|\W)hh(\W|$)/)[1]}; }
+						else if (format.match(/(^|\W)h(\W|$)/)) { return {fmt:"h", d:format.match(/(^|\W)h(\W|$)/)[1]}; }
+						else { return {fmt:"hidden", d:""}; }
+					}
+				});
+			},
+
+			_checkUnit: function (opts) {
+				var fmt, d,
+					element = this.querySelector(opts.selector),
+					result = opts.check(opts.format);
+				if (!result.d) {
+					element.removeAttribute("divider");
+				} else {
+					element.setAttribute("divider", result.d);
+				}
+
+				if (result.fmt == "hidden") {
+					element.setAttribute("hidden", true);
+					return false;
+				} else {
+					element.removeAttribute("hidden");
+					element.setAttribute("type", "date");
+					element.setAttribute("format", result.fmt);
+					return true;
+				}
+			}
+		});
+	</script>
+</dom-module>

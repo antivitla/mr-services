@@ -1,0 +1,16 @@
+{
+  "name": "something-001",
+  "authors": [
+    "Виталий Кулешин <antivitla@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#~1.2.3",
+    "autosize": "~3.0.13"
+  }
+}

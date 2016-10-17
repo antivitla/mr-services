@@ -1,0 +1,35 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+
+<dom-module id="mr-description">
+	<style>
+		:host #description.empty {
+			color: rgba(0,0,0, var(--dark-disabled-opacity));
+		}
+	</style>
+
+	<template>
+		<span id="description"></span>
+	</template>
+
+	<script>
+		Polymer({
+			is: "mr-description",
+			properties: {
+				value: {
+					type: String,
+					observer: "_descriptionChanged"
+				}
+			},
+			_descriptionChanged: function (newDescription) {
+				if (!newDescription) {
+					this.$.description.classList.add("empty");
+					this.$.description.textContent = "(не указано)";
+				} else {
+					this.$.description.classList.remove("empty");
+					this.$.description.textContent = newDescription;
+				}
+			}
+		});
+	</script>
+</dom-module>

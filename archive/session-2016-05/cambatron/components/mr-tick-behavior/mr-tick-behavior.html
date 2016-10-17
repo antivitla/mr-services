@@ -1,0 +1,23 @@
+<script>
+	MrTickBehavior = {
+		ticking: false,
+		tick: function (callback, delay) {
+			clearTimeout(this._tickTimeout);
+			this._tickTimeout = setTimeout(function () {
+				console.log("tick");
+				if (callback) {
+					callback(new Date());
+				}
+				if (this.ticking) {
+					this.tick(callback, delay);
+				}
+			}.bind(this), (delay ? delay : 200));
+			this.ticking = true;
+		},
+
+		untick: function () {
+			clearTimeout(this._tickTimeout);
+			this.ticking = false;
+		}
+	};
+</script>

@@ -1,0 +1,42 @@
+/*	Theme: Woman */
+
+*[theme="woman"] {
+	background-color: #424244;
+	color: #acacac;
+}
+
+*[theme="woman"] a {
+	color: #5fa7b1;
+	text-decoration: none;
+	border-bottom: solid rgba(95, 167, 177, 0.5) 1px;
+}
+
+*[theme="woman"] input[type="text"] {
+	border-color: rgba(194, 186, 148, 0.2);
+	height: 2.5rem;
+}
+
+*[theme="woman"] #theme {
+	background-image: url(../images/jetta-by-dracoimagem.png);
+}
+
+
+/* 	Something-input */
+
+*[theme="woman"] something-input textarea {
+	color: rgba(172, 172, 172, 0.7);
+	resize: none;
+}
+
+
+/* 	Toggle lang */
+
+*[theme="woman"] #lang {
+	width: 30px;
+	text-transform: uppercase;
+}
+
+*[theme="woman"] toggle-option#lang[name="lang"] option {
+	display: inline;
+	border-bottom: solid rgba(172, 172, 172, 0.5) 1px;
+}

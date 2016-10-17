@@ -1,0 +1,34 @@
+<ul id="list">
+	<template id="list-item-template">
+		<li>
+			<span class="start"></span>
+			<span class="description"></span>
+			<span class="duration"></span>
+		</li>
+	</template>
+</ul>
+
+<script>
+	var list = [{
+		start: new Date() - 60000,
+		description: "Новая задача",
+		stop: new Date() - 45000
+	}, {
+		start: new Date() - 120000,
+		description: "Старая задача",
+		stop: new Date() - 100000
+	}, {
+		start: new Date() - 150000,
+		description: "Ещё одна задача",
+		stop: new Date() - 115000
+	}];
+	var listElement = document.getElementById("list");
+	var listItemTemplateElement = document.getElementById("list-item-template");
+	for (var i = 0; i < list.length; i++) {
+		var clone = listItemTemplateElement.content.cloneNode(true);
+		clone.querySelector(".start").textContent = list[i].start;
+		clone.querySelector(".description").textContent = list[i].description;
+		clone.querySelector(".duration").textContent = list[i].stop - list[i].start;
+		listElement.appendChild(clone);
+	}
+</script>

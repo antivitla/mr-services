@@ -1,0 +1,183 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="mr-tick-behavior.html">
+<link rel="import" href="mr-date-behavior.html">
+<link rel="import" href="mr-hour.html">
+<link rel="import" href="mr-minute.html">
+<link rel="import" href="mr-second.html">
+
+<dom-module id="mr-time">
+	<style>
+		@-moz-keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		@-webkit-keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		@keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		:host .divider:after {
+			content: attr(divider);
+			margin: 0 0.1em;
+			-moz-animation: tick 1s infinite;
+			-webkit-animation: tick 1s infinite;
+			animation: tick 1s infinite;
+			@apply(--mr-time-animated-divider);
+		}
+
+		:host mr-hour:not([hidden]) ~ mr-minute[format*="min"] {
+			margin-left: 0.2em;
+		}
+
+		:host mr-minute:not([hidden]) ~ mr-second[format*="sec"] {
+			margin-left: 0.2em;
+		}
+	</style>
+
+	<template><mr-hour date="[[date]]"></mr-hour><span class="divider"></span><mr-minute date="[[date]]"></mr-minute><mr-second date="[[date]]"></mr-second></template>
+
+	<script>
+		Polymer({
+			is: "mr-time",
+			properties: {
+				type: {
+					type: String,
+					value: "fixed",
+					reflectToAttribute: true,
+					observer: "_typeChanged"
+				},
+				format: {
+					type: String,
+					value: "hh:mm",
+					observer: "_formatChanged"
+				}
+			},
+
+			behaviors: [MrDateBehavior, MrTickBehavior],
+
+			_typeChanged: function (type) {
+				if (type == "current") {
+					this.tick(200, function (date) {
+						this.date = date;
+					}.bind(this));
+				}
+				else {
+					this.untick();
+					// if (type == "duration" && this.format) {
+					// 	this._formatChanged(this.format);
+					// }
+				}
+			},
+
+			_formatChanged: function (format) {
+				var seccheck = this._checkSeconds(format),
+					mincheck = this._checkMinutes(format),
+					hourcheck = this._checkHours(format),
+					animatedDivider = this.querySelector(".divider");
+
+				// Нужен ли анимационный разделитель (для текущего времени)
+				if (!seccheck && mincheck && hourcheck && this.type == "current") {
+					animatedDivider.removeAttribute("hidden");
+					this.querySelector("mr-minute").removeAttribute("divider");
+					if (format.match(/(hou|min)/g)) {
+						animatedDivider.setAttribute("hidden", true);
+					}
+				} else {
+					animatedDivider.setAttribute("hidden", true);
+				}
+
+				// Возвращаем на место (если надо) разделитель минут
+				if (format.match(/(^|\W)m+(\W|$)/)) {
+					animatedDivider.setAttribute("divider", format.match(/(^|\W)m+(\W|$)/)[1]);
+				}
+
+				// Если тип времени - длительность
+				if (this.type == "duration") {
+					if (hourcheck) {
+						this.querySelector("mr-hour").setAttribute("type", "duration");
+					} else if (!hourcheck && mincheck) {
+						this.querySelector("mr-minute").setAttribute("type", "duration");
+					} else if (!hourcheck && !mincheck && seccheck) {
+						this.querySelector("mr-second").setAttribute("type", "duration");
+					}
+				}
+			},
+
+			_checkSeconds: function (format) {
+				return this._checkUnit({
+					selector: "mr-second",
+					format: format,
+					check: function (format) {
+						if (format.match(/sseconds/)) { return {fmt:"sseconds", d:""}; }
+						else if (format.match(/seconds/)) { return {fmt:"seconds", d:""}; }
+						else if (format.match(/ssec/)) { return {fmt:"ssec", d:""}; }
+						else if (format.match(/sec/)) { return {fmt:"sec", d:""}; }
+						else if (format.match(/(^|\W)ss(\W|$)/)) { return {fmt:"ss", d:format.match(/(^|\W)ss(\W|$)/)[1]}; }
+						else if (format.match(/(^|\W)s(\W|$)/)) { return {fmt:"s", d:format.match(/(^|\W)s(\W|$)/)[1]}; }
+						else { return {fmt:"hidden", d:""}; }
+					}
+				});
+			},
+
+			_checkMinutes: function (format) {
+				return this._checkUnit({
+					selector: "mr-minute",
+					format: format,
+					check: function (format) {
+						if (format.match(/mminutes/)) { return {fmt:"mminutes", d:""}; }
+						else if (format.match(/minutes/)) { return {fmt:"minutes", d:""}; }
+						else if (format.match(/mmin/)) { return {fmt:"mmin", d:""}; }
+						else if (format.match(/min/)) { return {fmt:"min", d:""}; }
+						else if (format.match(/(^|\W)mm(\W|$)/)) { return {fmt:"mm", d:format.match(/(^|\W)mm(\W|$)/)[1]}; }
+						else if (format.match(/(^|\W)m(\W|$)/)) { return {fmt:"m", d:format.match(/(^|\W)m(\W|$)/)[1]}; }
+						else { return {fmt:"hidden", d:""}; }
+					}
+				});
+			},
+
+			_checkHours: function (format) {
+				return this._checkUnit({
+					selector: "mr-hour",
+					format: format,
+					check: function (format) {
+						if (format.match(/hhours/)) { return {fmt:"hhours", d:""}; }
+						else if (format.match(/hours/)) { return {fmt:"hours", d:""}; }
+						else if (format.match(/(^|\W)hh(\W|$)/)) { return {fmt:"hh", d:format.match(/(^|\W)hh(\W|$)/)[1]}; }
+						else if (format.match(/(^|\W)h(\W|$)/)) { return {fmt:"h", d:format.match(/(^|\W)h(\W|$)/)[1]}; }
+						else { return {fmt:"hidden", d:""}; }
+					}
+				});
+			},
+
+			_checkUnit: function (opts) {
+				var fmt, d,
+					element = this.querySelector(opts.selector),
+					result = opts.check(opts.format);
+				if (!result.d) {
+					element.removeAttribute("divider");
+				} else {
+					element.setAttribute("divider", result.d);
+				}
+
+				if (result.fmt == "hidden") {
+					element.setAttribute("hidden", true);
+					return false;
+				} else {
+					element.removeAttribute("hidden");
+					element.setAttribute("type", "date");
+					element.setAttribute("format", result.fmt);
+					return true;
+				}
+			}
+		});
+	</script>
+</dom-module>

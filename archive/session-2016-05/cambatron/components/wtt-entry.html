@@ -1,0 +1,104 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+
+<dom-module id="wtt-entry">
+	<style>
+		:host  {
+			display: block;
+			position: relative;
+			cursor: pointer;
+
+			--wtt-entry-hover-color: rgba(0,0,0, 0.05);
+		}
+
+		:host:hover {
+			background-color: var(--wtt-entry-hover-color);
+		}
+
+		:host:last-of-type {
+			/*padding-bottom: 24px;*/
+			/*border-bottom: solid rgba(0,0,0, var(--dark-divider-opacity)) 1px;*/
+		}
+
+		:host[edit] {
+			/*border: solid red 2px;*/
+		}
+
+		:host ::content mr-time {
+			font-size: 16px;
+			line-height: 24px;
+			font-weight: 300;
+			/*color: rgba(0,0,0, var(--dark-secondary-opacity));*/
+		}
+
+		:host ::content mr-duration {
+			font-size: 16px;
+			line-height: 24px;
+			font-weight: 300;
+			/*color: rgba(0,0,0, var(--dark-secondary-opacity));*/
+		}
+
+		:host ::content mr-duration:last-child {
+			width: 56px;
+			text-align: right;
+			/*color: rgba(0,0,0, var(--dark-secondary-opacity));*/
+		}
+
+		:host ::content mr-description {
+			font-size: 16px;
+			font-weight: 400;
+			line-height: 24px;
+		}
+
+		:host ::content mr-timer mr-duration {
+			text-transform: lowercase;
+		}
+
+		:host paper-icon-item {
+			position: relative;
+			z-index: 1;
+		}
+
+		:host paper-ripple {
+			z-index: 0;
+		}
+	</style>
+
+	<template>
+		<paper-material elevation="[[elevation]]">
+			<paper-icon-item id="entry">
+				<content></content>
+			</paper-icon-item>
+			<paper-ripple></paper-ripple>
+		</paper-material>
+	</template>
+
+	<script>
+		Polymer({
+			is: "wtt-entry",
+			properties: {
+				elevation: {
+					type: Number
+				},
+				entry: {
+					type: Object
+				},
+				edit: {
+					type: Boolean,
+					observer: "_editChanged"
+				}
+			},
+			ready: function () {
+				this.elevation = 0;
+			},
+			_editChanged: function (newEdit) {
+				console.log("edit", newEdit)
+			}
+		});
+	</script>
+</dom-module>

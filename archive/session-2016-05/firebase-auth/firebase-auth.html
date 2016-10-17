@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Firebase-авторизация</title>
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			var firebase = new Firebase("https://brilliant-fire-1299.firebaseio.com");
+			console.log(firebase.getAuth());
+		});
+
+		function auth (provider) {
+			var firebase = new Firebase("https://brilliant-fire-1299.firebaseio.com");
+			firebase.authWithOAuthPopup(provider, function (error, authData) {
+				if (error) {
+					console.log("Auth failed", error);
+				} else {
+					console.log("Auth success", authData);
+				}
+			});
+		}
+	</script>
+</head>
+<body>
+
+	<h1>Firebase-авторизация</h1>
+	<p>Войти с помощью
+		<a href="#" onclick="auth('facebook');">Facebook</a>,
+		<a href="#" onclick="auth('github');">Github</a>
+	</p>
+
+	<p>Существует команда старта авторизации, которую можно повесить на кнопку или запустить автоматом.</p>
+
+	<p>Существует команда проверить авторизованы мы уже или нет.</p>
+
+	<p>Нужна проверка новый ли это пользователь и сохранение его данных в базу. Рекомендуется в "users/&lt;uid>/"</p>
+
+	<script src="../bower_components/firebase/firebase.js"></script>
+</body>
+</html>

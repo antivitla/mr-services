@@ -1,0 +1,44 @@
+
+<style></style>
+
+<template>
+	<something-save>
+		<something-load>
+			<content></content>
+		</something-load>
+	</something-save>
+</template>
+
+<script>
+
+(function () {
+
+	var prototype = Object.create(HTMLElement.prototype),
+		template = document.querySelector("link[href*='something-todo.html']")
+			.import.querySelector("template");
+
+	prototype.createdCallback = function () {
+		var root = this.createShadowRoot(),
+			t = template.content.cloneNode(true);
+
+		if (this.getAttribute("uid")) {
+			t.querySelector("something-load").setAttribute("uid", this.getAttribute("uid"));
+			t.querySelector("something-save").setAttribute("uid", this.getAttribute("uid"));
+		}
+		root.appendChild(t);
+	};
+
+	prototype.attachedCallback = function () {
+		//
+	};
+
+	prototype.attributeChangedCallback = function (attrName, attrNew, attrOld) {
+		console.log(attrName, attrNew, attrOld);
+	};
+
+	document.registerElement("something-todo", { prototype: prototype });
+
+}());
+
+
+</script>

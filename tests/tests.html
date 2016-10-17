@@ -1,0 +1,32 @@
+<pool></pool>
+
+<script>
+  // Logik
+
+  var pool = {};
+
+  commit("Hello world!", pool);
+  commit("Another commit", pool);
+  updateView(document.querySelector("pool"), pool);
+
+  // Lib
+
+  function commit (content, pool) {
+    pool[generateKey()] = content;
+  }
+
+  function generateKey () {
+    return String(parseInt(Math.random()*(new Date()).getTime()));
+  }
+
+  function updateView (element, pool) {
+    element.innerHTML = JSON.stringify(pool);
+  }
+</script>
+
+<style>
+  pool {
+    display: block;
+    font-family: monospace;
+  }
+</style>

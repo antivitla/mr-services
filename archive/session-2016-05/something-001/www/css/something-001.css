@@ -1,0 +1,105 @@
+html[lang="ru"] *[lang]:not([lang="ru"]),
+html[lang="en"] *[lang]:not([lang="en"]) {
+	display: none;
+}
+
+html {
+	-ms-text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+	font-size: 62.5%;
+}
+
+body {
+	font-family: "Fira Sans","Sitka Text", sans-serif;
+	font-size: 2rem;
+	line-height: 3rem;
+	font-weight: 300;
+	/*display: flex;*/
+	/*align-items: flex-start;*/
+	/*justify-content: center;*/
+}
+
+header {
+	font-family: "Sitka Heading";
+	font-size: 8rem;
+	line-height: 1;
+	margin: 0.5em 0 1em 0;
+}
+
+p {
+	margin: 3rem 0;
+}
+
+a {
+	text-decoration: none;
+	border-bottom: solid 1px;
+	color: inherit;
+	cursor: pointer;
+}
+
+aside {
+	width: 25%;
+	position: fixed;
+	left: 2.5%;
+	top: 2rem;
+	bottom: 2rem;
+	/*background-color: red;*/
+}
+
+main {
+	width: 60%;
+	max-width: 40em;
+	position: relative;
+	left: 32.5%;
+}
+
+/*	Переключатель тем */
+
+
+toggle-option#theme {
+	width: 100%;
+	height: 100%;
+	display: block;
+	position: absolute;
+	left: 0; top: 0; right: 0; bottom: 0;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
+toggle-option#theme option {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+/*
+
+
+#app {
+	max-width: 40em;
+	margin-left: 35%;
+}
+
+#lang {
+	margin-left: 5%;
+	margin-right: 2%;
+	cursor: pointer;
+}*/
+
+/*toggle-option:after {
+	content: ":";
+	font-size: 80%;
+	margin-left: -0.2em;
+}
+
+toggle-option option {
+	display: inline;
+	font-weight: 500;
+}
+
+toggle-option + something-input {
+	margin-top: 1rem;
+}*/

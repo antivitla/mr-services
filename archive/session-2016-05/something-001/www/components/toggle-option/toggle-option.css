@@ -1,0 +1,19 @@
+@charset "utf-8";
+
+toggle-option {
+	display: inline-block;
+	cursor: pointer;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+toggle-option option {
+	padding: 0;
+	cursor: pointer;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+toggle-option option:not([selected]) {
+	display: none !important;
+}

@@ -1,0 +1,81 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="mr-second">
+	<style>
+		:host:after {
+			margin-left: 0.2em;
+			@apply(--mr-second-unit);
+		}
+
+		:host[format*="sec"]:after {
+			content: "cек";
+		}
+
+		:host[format*="second"]:after {
+			content: attr(unit);
+		}
+	</style>
+
+	<template></template>
+
+	<script>
+		Polymer({
+			is: "mr-second",
+			properties: {
+				value: {
+					type: Number,
+					reflectToAttribute: true,
+					observer: "_render"
+				},
+				format: {
+					type: String,
+					value: "ss",
+					reflectToAttribute: true,
+					observer: "_render"
+				}
+			},
+
+			attached: function () {
+				// Если не дали значение, выводим текущее время (фича)
+				if (!this.value && this.value != 0) {
+					this.value = (new Date()).getSeconds();
+				}
+			},
+
+			_render: function () {
+				if (this.value || this.value == 0) {
+					this.textContent = this._format(this.value);
+					this.setAttribute("unit", this._unit(this.value));
+				} else {
+					this.textContent = "";
+					this.removeAttribute("unit");
+				}
+			},
+
+			_format: function (s) {
+				var stringArray = String(s).split("");
+				if (stringArray.length == 1 && this.format.search("ss") > -1) {
+					stringArray.unshift("0");
+				} else if (stringArray.length > 3) {
+					for (var i = -3; i > -1 * stringArray.length; i -= 3) {
+						stringArray.splice(i, 0, " ");
+						i -= 1;
+					}
+				}
+				return stringArray.join("");
+			},
+
+			_unit: function (seconds) {
+				var digit = seconds % 10,
+					digits = seconds % 100;
+				if (digit == 0 || (digits >= 5 && digits <= 19) || (digit >= 5 && digit <= 9)) {
+					return "секунд";
+				} else if (digit == 1) {
+					return "секунда";
+				} else {
+					return "секунды";
+				}
+			}
+		});
+	</script>
+</dom-module>

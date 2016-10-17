@@ -1,0 +1,7 @@
+<script>
+	Filters = {
+		_leadingZeroFilter: function (number, digits) {
+			return ("000000000000000" + number).slice(digits ? (-1*digits) : 0);
+		}
+	};
+</script>

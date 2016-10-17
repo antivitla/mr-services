@@ -1,0 +1,32 @@
+
+<script>
+(function (){
+
+	var prototype = Object.create(HTMLElement.prototype);
+
+	prototype.attachedCallback = function () {
+		if (this.getAttribute("uid")) {
+			somethingLoad(this, this.getAttribute("uid"));
+		}
+	};
+
+	prototype.attributeChangedCallback = function (attrName, oldVal, newVal) {
+		if (attrName == "uid" && (oldVal != newVal)) {
+			// somethingLoad(this, newVal);
+			console.log(attrName, newVal, this.getAttribute("uid"), localStorage.getItem(newVal));
+		}
+	}
+
+	document.registerElement("something-load", { prototype: prototype });
+
+	function somethingLoad(placeholderElement, uid) {
+		var saved = localStorage.getItem(uid);
+		if (saved) {
+			placeholderElement.outerHTML = saved;
+		} else {
+			placeholderElement.remove();
+		}
+	}
+
+}());
+</script>

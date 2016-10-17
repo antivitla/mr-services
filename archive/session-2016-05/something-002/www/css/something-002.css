@@ -1,0 +1,33 @@
+html {
+	-ms-text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+	font-size: 62.5%;
+}
+
+body {
+	font-family: "Fira Sans","Sitka Text", sans-serif;
+	font-size: 2rem;
+	line-height: 3rem;
+	font-weight: 300;
+	/*display: flex;*/
+	/*align-items: flex-start;*/
+	/*justify-content: center;*/
+}
+
+header {
+	font-family: "Sitka Heading";
+	/*font-size: 8rem;*/
+	line-height: 1;
+	/*margin: 0.5em 0 1em 0;*/
+}
+
+p {
+	margin: 3rem 0;
+}
+
+a {
+	text-decoration: none;
+	border-bottom: solid 1px;
+	color: inherit;
+	cursor: pointer;
+}

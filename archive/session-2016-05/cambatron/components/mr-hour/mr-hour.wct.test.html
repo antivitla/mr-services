@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>mr-hour</title>
+	<script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+	<script src="../../bower_components/web-component-tester/browser.js"></script>
+
+	<style>body { margin: 8px !important; width: auto; height: auto; }</style>
+
+	<link rel="import" href="mr-hour.html">
+</head>
+<body>
+
+	<p>Который час? &mdash; <mr-hour format="hour"></mr-hour></p>
+
+	<div id="hours">
+		<h3>Часы</h3>
+	</div>
+
+	<script>
+		var mrHour = document.querySelector("mr-hour");
+		var hours = document.querySelector("#hours");
+		var p, h;
+
+		function echo(el) {
+			console.log(el.value, el.format);
+		}
+
+		describe("<mr-hour>", function () {
+			beforeEach(function () {
+				h = document.createElement("mr-hour");
+				p = document.createElement("p");
+				hours.appendChild(p);
+				doappend = true;
+			});
+
+			afterEach(function () {
+				p.appendChild(document.createTextNode("<mr-hour format=\"" + h.getAttribute("format") + "\" value=\"" + h.getAttribute("value") +"\" unit=\"" + h.getAttribute("unit") + "\">"));
+				if (doappend) {
+					p.appendChild(h);
+				} else {
+					p.appendChild(document.createTextNode(h.textContent));
+				}
+				p.appendChild(document.createTextNode("</mr-hour>"));
+				p.appendChild(document.createTextNode(" { value: " + h.value + ", format: " + h.format + " }"));
+			});
+
+			it("Если не дали значение, выводим текущее время", function () {
+				// console.log(h);
+				p.appendChild(h);
+				doappend = false;
+				// echo(h);
+				expect(h.value).to.equal( (new Date()).getHours() );
+			});
+
+			it("Если дали через атрибут, должны получить в .value", function () {
+				h.setAttribute("value", 19);
+				// echo(h);
+				expect(h.value).to.equal(19);
+			});
+
+			it("Если дали через .value, получить через атрибут", function () {
+				h.value = 11;
+				// echo(h);
+				expect(h.getAttribute("value")).to.equal("11");
+			});
+
+			it("А если NaN?", function (done) {
+				p.appendChild(h);
+				doappend = false;
+				setTimeout(function (){
+					h.value = NaN;
+					expect(true).to.equal(true);
+					done();
+				},1);
+			});
+
+			it("А если undefined?", function (done) {
+				p.appendChild(h);
+				doappend = false;
+				setTimeout(function (){
+					h.value = undefined;
+					expect(true).to.equal(true);
+					done();
+				},1);
+			});
+
+			it("А если null?", function (done) {
+				p.appendChild(h);
+				doappend = false;
+				setTimeout(function (){
+					h.value = null;
+					expect(true).to.equal(true);
+					done();
+				},1);
+			});
+
+			it("Отрицательные числа", function (done) {
+				p.appendChild(h);
+				h.format ="hh";
+				doappend = false;
+				setTimeout(function (){
+					h.value = -1;
+					expect(h.textContent).to.equal("-1");
+					done();
+				},1);
+			});
+
+			it("Малые числа", function (done) {
+				p.appendChild(h);
+				h.format ="hh";
+				doappend = false;
+				setTimeout(function (){
+					h.value = 2;
+					expect(h.textContent).to.equal("02");
+					done();
+				},1);
+			});
+
+			it("Большие числа", function (done) {
+				// p.appendChild(h);
+				h.format ="hh";
+				doappend = false;
+				setTimeout(function (){
+					h.value = -29881598729900;
+					expect(h.textContent).to.equal("-29 881 598 729 900");
+					done();
+				},1);
+			});
+
+			it("Единицы грамматические", function () {
+				h.format ="hour";
+				h.value = 1;
+				expect(h.getAttribute("unit")).to.equal("час");
+			});
+
+			it("Единицы грамматические", function () {
+				h.format ="hour";
+				h.value = 3;
+				expect(h.getAttribute("unit")).to.equal("часа");
+			});
+
+			it("Единицы грамматические", function () {
+				h.format ="hour";
+				h.value = 15;
+				expect(h.getAttribute("unit")).to.equal("часов");
+			});
+		});
+	</script>
+
+</body>
+</html>

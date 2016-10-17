@@ -1,0 +1,62 @@
+<meta charset="utf-8">
+<!-- Lib -->
+<script src="../node_modules/radio/radio.js"></script>
+<!-- <script src="../node_modules/moment/moment.js"></script> -->
+<script src="../node_modules/chance/chance.js"></script>
+<script src="../node_modules/node-uuid/uuid.js"></script>
+<!-- App -->
+<script src="storage.js"></script>
+<script src="storage-localstorage.js"></script>
+<!-- <script src="commit.js"></script> -->
+
+<script>
+  // function value (item) {
+  //   return item[Object.keys(item)[0]];
+  // }
+  //
+  // radio("commitCreate").subscribe(function (commit) {
+  //   // note
+  //   if (typeof commit.content == "object" && !commit.content.created) {
+  //     commit.content.created = (new Date()).getTime();
+  //   }
+  // });
+
+  function create(type, content) {
+    if (content === undefined) {
+      return add(content);
+    } else {
+      return add({[type]: create(content)});
+    }
+  }
+
+  function list (type) {
+    var list = get()
+      .map(function (item) { return item[Object.keys(item)[0]]});
+    if (type) {
+      list = list
+        .filter(function (item) { return item[type]; })
+        .map(function (item) { return get(item[type]); });
+    }
+    return list;
+  }
+
+  function render (list) {
+    document.querySelector("body").innerHTML = list
+      .reduce(function (list, item) {
+        return list + "<p>" + (typeof item == "string" ? item : JSON.stringify(item)) + "</p>";
+      }, "");
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    render(list("client"));
+  });
+
+</script>
+
+<style>
+  p {
+    white-space: pre-wrap;
+  }
+</style>
+
+<body></body>

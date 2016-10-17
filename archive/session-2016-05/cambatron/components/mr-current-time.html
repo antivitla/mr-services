@@ -1,0 +1,48 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="mr-date-behavior.html">
+<link rel="import" href="mr-tick-behavior.html">
+
+<dom-module id="mr-current-time">
+	<style>
+		@-moz-keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		@-webkit-keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		@keyframes tick {
+			0% { opacity: 1.00; }
+			50% { opacity: 0.00; }
+			100% {opacity: 0.99; }
+		}
+
+		:host {
+			--mr-time-divider: {
+				margin: 0 0.1em;
+				-moz-animation: tick 1s infinite;
+				-webkit-animation: tick 1s infinite;
+				animation: tick 1s infinite;
+			};
+		}
+	</style>
+
+	<template><mr-time date="{{date}}"></mr-time></template>
+
+	<script>
+		Polymer({
+			is: "mr-current-time",
+			behaviors: [MrTickBehavior],
+			ready: function () {
+				this.tick(200, function (date) {
+					this.date = date;
+				}.bind(this));
+			}
+		});
+	</script>
+</dom-module>

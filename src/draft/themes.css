@@ -1,0 +1,12 @@
+[theme] {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 300;
+  font-family: "Sitka Text", sans-serif;
+}
+
+[theme="astronaught"] {
+  background-color: #443532;
+	color: rgba(194, 186, 148, 0.8);
+}

@@ -1,0 +1,14 @@
+<script>
+	MrDurationBehavior = {
+		properties: {
+			duration: {
+				type: Number,
+				observer: "durationChanged",
+				reflectToAttribute: true
+			}
+		},
+
+		// Пользовательский коллбэк при изменении длительности
+		durationChanged: function (duration) {}
+	}
+</script>

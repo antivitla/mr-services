@@ -1,0 +1,15 @@
+<script>
+	MrDateBehavior = {
+		properties: {
+			date: {
+				type: Date,
+				notify: true,
+				observer: "dateChanged",
+				// reflectToAttribute: true
+			}
+		},
+
+		// Пользовательский коллбэк при изменении даты
+		dateChanged: function (newDate) {}
+	}
+</script>

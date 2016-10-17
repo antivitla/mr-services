@@ -1,0 +1,48 @@
+
+<script>
+(function (){
+
+	var prototype = Object.create(HTMLElement.prototype);
+
+	prototype.attachedCallback = function () {
+		var observer = new MutationObserver(function (mutations) {
+			mutations.forEach(function (mutation) {
+				check(mutation);
+			});
+		});
+
+		observer.observe(this, {
+			childList: true
+		});
+
+		// // Сохраняем по специальному событию
+		// this.addEventListener("something-created", function (event) {
+		// 	console.log(event.detail.somethingElement);
+		// 	// Сделаем новый uid и сохраним под ним новый элемент
+		// 	var newUID = generateUID();
+		// 	localStorage.setItem(newUID, event.detail.somethingElement.outerHTML);
+		// 	// Если передали куда сохранять новые элементы, суём
+		// 	var uid = this.getAttribute("uid");
+		// 	if (uid) {
+		// 		localStorage.setItem(uid, (localStorage.getItem(uid) || "") +
+		// 			"<something-load uid='" + newUID + "'></something-load>");
+		// 	}
+		// });
+	};
+
+	document.registerElement("something-save", { prototype: prototype });
+
+	function generateUID (somethingElement) {
+		return "something@" + String((new Date()).getTime()) + String(parseInt(Math.random()*100000));
+	}
+
+	function check (mutation) {
+		// Сохранять добавление, только если это не загрузочные элементы и
+		// не первоначальное их появление
+		if (mutation.addedNodes.length > 0) {
+			// for
+		}
+	}
+
+}());
+</script>

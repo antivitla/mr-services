@@ -1,0 +1,129 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="mr-duration">
+	<style>
+		/*value {
+			font-weight: 300;
+			@apply(--mr-duration-value);
+		}
+
+		unit {
+			font-weight: 300;
+			@apply(--mr-duration-unit);
+		}
+
+		:host:not(.long) #long {
+			display: none;
+		}
+
+		:host:not([long]) .minutes {
+			font-weight: 300;
+		}
+
+		:host:not([long]) .hours {
+			font-weight: 300;
+		}
+
+		:host.long {
+			white-space: nowrap;
+			width: auto !important;
+		}
+
+		:host.precise #unit {
+			display: none;
+		}*/
+
+	</style>
+
+	<template>
+		<span id="long">
+			<value id="long-value"></value>
+			<unit id="long-unit"></unit>
+		</span>
+		<value id="value"></value>
+		<unit id="unit"></unit>
+	</template>
+
+	<script>
+		Polymer({
+			is: "mr-duration",
+			properties: {
+				value: {
+					type: Number,
+					observer: "_durationChanged"
+				},
+				long: {
+					type: Boolean
+				},
+				format: {
+					type: String,
+					observer: "_formatChanged"
+				}
+			},
+
+			_durationChanged: function (newDuration) {
+				if (this.format == "precise") {
+					var hrs = Math.floor(newDuration/3600000);
+					var min = Math.floor((newDuration - hrs*3600000)/60000);
+					var sec = Math.floor((newDuration - hrs*3600000 - min*60000)/1000);
+					this.$.value.textContent = ("0"+hrs).slice(-2)+":"+("0"+min).slice(-2)+":"+("0"+sec).slice(-2)
+				} else {
+					if (newDuration < 3600000) {
+						this.$.value.classList.add("minutes");
+						this.$.value.classList.remove("hours");
+						this.$.unit.classList.add("minutes");
+						this.$.unit.classList.remove("hours");
+						var min = Math.ceil(newDuration/60000);
+						this.$.value.textContent = min;
+						this.$.unit.textContent = "мин";
+					} else {
+						var hrs = Math.floor(newDuration/3600000);
+						var min = Math.ceil((newDuration - hrs*3600000)/60000);
+						this.$["long-value"].textContent = hrs;
+						this.$["long-unit"].textContent = this._grammarHrs(hrs);
+						if (this.format != "long") {
+							// hrs = Math.round(newDuration/1800000);
+							// if (hrs % 2 != 0) {
+							// 	hrs = (hrs*0.5).toFixed(1);
+							// } else {
+							// 	hrs = parseInt(hrs*0.5, 10);
+							// }
+							hrs = Math.round(newDuration/3600000);
+							this.$.value.classList.remove("minutes");
+							this.$.value.classList.add("hours");
+							this.$.unit.classList.remove("minutes");
+							this.$.unit.classList.add("hours");
+							this.$.value.textContent = hrs;
+							this.$.unit.textContent = this._grammarHrs(hrs);
+						} else {
+							this.$.value.textContent = ("0" + min).slice(-2);
+							this.$.unit.textContent = "мин";
+						}
+					}
+				}
+			},
+
+			_formatChanged: function (format) {
+				this.toggleClass(format, true);
+			},
+
+			_grammarHrs: function (hrs) {
+				/*
+				x0 часов
+				x1 час
+				x2, x3, x4 часа
+				x5-x19 часов
+				*/
+				var digit = hrs % 10,
+					digits = hrs % 100;
+				if ((digits >= 5 && digits <= 19) || digit == 0) { return "часов"; }
+				else if (digit == 1) { return "час"; }
+				else return "часа";
+			}
+		});
+
+		function _mrDurationFromTick () {
+			//
+		}
+	</script>
+</dom-module>

@@ -1,0 +1,18 @@
+<meta charset="utf-8">
+<script src="../node_modules/moment/min/moment-with-locales.js"></script>
+<script>
+moment.locale(["ru", "en"]);
+var date = "18 января 2016";
+
+function parse(d, format) {
+  var m = moment(d, format);
+  if(!m.isValid()) {
+    console.warn(m.invalidAt(), m);
+  } else {
+    console.log(m, m.creationData(), m.month(), m.date());
+  }
+}
+
+parse(date, "DD MMM YYYY");
+</script>
+<h1>Hello</h1>

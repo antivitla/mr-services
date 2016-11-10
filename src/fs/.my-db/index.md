@@ -1,6 +1,0 @@
-- [Файловая версия (CLI или FileSystem)](.my-db/Fajlovaya-versiya-CLI-ili-FileSystem.md) <!-- {"md5":"3e4f38ac8a8cc460c1f3bde872ab8e24","source":"docs/Файловая версия.md"} -->
-- [Создаем файл индекса-содержания](.my-db/Sozdaem-fajl-indeksa-soderzhaniya.md) <!-- {"md5":"4560c4b3a3f24a532d5a48664d0f7e8d","source":"docs/Файловая версия.md"} -->
-- [PDF - база данных](.my-db/PDF-baza-dannyh.md) <!-- {"md5":"31f8f8bf4b9cb4470b4b03c9fbd1c213","source":"docs/Файловая версия.md"} -->
-- [Нужен файл настроек](.my-db/Nuzhen-fajl-nastroek.md) <!-- {"md5":"e0d85ff36f3c434bcc2e84a9f4daba02","source":"docs/Файловая версия.md"} -->
-- [В качестве формата доп](.my-db/V-kachestve-formata-dop.md) <!-- {"md5":"860e208ab7eca69dd10ffeb2defbd55c","source":"docs/Файловая версия.md"} -->
-- [Содержание содержанием](.my-db/Soderzhanie-soderzhaniem.md) <!-- {"md5":"903fcf0702a310b6b8977f2fbae45c32","source":"docs/Файловая версия.md"} -->

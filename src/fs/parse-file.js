@@ -1,54 +1,35 @@
 var es = require("event-stream");
 var fs = require("fs");
 var q = require("q");
-var moment = require("moment");
 var uuid = require("node-uuid");
 
 var contentDelimiter = require("./content-delimiter");
 var extractDate = require("./extract-date");
 var extractTitle = require("./extract-title");
 var pickExcerpt = require("./pick-excerpt");
+var pickProperties = require("./pick-properties");
 var createMarkdownIndexEntry = require("./create-markdown-index-entry");
+var transformContentAndKeepContext = require("./transform-content-and-keep-context");
 
-var chalk = require("chalk");
-var util = require("util");
-
-// contentObject, contextObject, keys, transform, transformOptions
-function transformContentAndKeepContext (options) {
-  options.keys.forEach(function (key) {
-    options.contentObject[key] = options.contextObject[key];
-  });
-  Object.assign(options.contentObject, options.transform(options.contentObject, options.transformOptions));
-  options.keys.forEach(function (key) {
-    options.contextObject[key] = options.contentObject[key];
-  });
-}
-
-function pickPropeties (contentObject) {
-  var commentsRegexp = /<!--(.|\s)*?-->/g;
-  if (contentObject.content.match(commentsRegexp)) {
-    try {
-      var properties = JSON.parse(contentObject.content.match(commentsRegexp)[0]
-        .replace(/<!--|-->/g,"")
-        .trim());
-      return properties;
-    } catch (error) {
-      console.error(error);
-    }
-  }
-  return contentObject;
-}
-
-function parseFile (filename) {
-  // var fileTitle = (process.platform == "win32" ? path.win32.parse(filename).name : path.posix.parse(filename).name);
+function parseFileStat (filename) {
   var deferred = q.defer();
-  var index = [];
-  var initialContentObject = {};
-  var contextObject = {
-    date: fs.statSync(filename).birthtime
-  };
+  fs.stat(filename, function (error, stat) {
+    if (!error) {
+      deferred.resolve(stat);
+    } else {
+      deferred.reject(stat);
+    }
+  });
+  return deferred.promise;
+}
 
+function parseFileContent (filename, contextObject) {
+  var index = [];
+  var deferred = q.defer();
+
+  // read file content and..
   fs.createReadStream(filename)
+
     // split content
     .pipe(es.split(contentDelimiter))
 
@@ -67,7 +48,7 @@ function parseFile (filename) {
     // add contentObject properties defined in note, if any
     .pipe(es.map(function (contentObject, next) {
       next(null, Object.assign(contentObject,
-        pickPropeties(contentObject)));
+        pickProperties(contentObject)));
     }))
 
     // add {id}
@@ -99,19 +80,6 @@ function parseFile (filename) {
       next(null, contentObject);
     }))
 
-    // // extract options {group} from title and merge with context group
-    // .pipe(es.map(function (contentObject, next) {
-    //   transformContentAndKeepContext({
-    //     contentObject: contentObject,
-    //     contextObject: contextObject,
-    //     keys: ["groups"],
-    //     transform: extractGroups
-    //   });
-    //   next(null, contentObject);
-    // }))
-
-
-
     // add {markdownIndexEntry}
     .pipe(es.map(function (contentObject, next) {
       next(null, Object.assign(contentObject,
@@ -137,14 +105,22 @@ function parseFile (filename) {
   return deferred.promise;
 }
 
+function parseFile (filename) {
+  return parseFileStat(filename).then(function (stat) {
+    return parseFileContent(filename, {
+      date: stat.birthtime
+    });
+  });
+}
+
 module.exports = parseFile;
 
+// If executed standalone
 if (process.argv[2]) {
-  console.log(process.argv[2]);
   parseFile(process.argv[2]).then(function (index) {
-    // console.log(index);
-    index.forEach(function (obj) {
-      console.log((obj.title ? chalk.yellow(obj.title) : chalk.grey(obj.excerpt)), chalk.cyan(obj.date));
-    })
+    var output = index.map(function (item) {
+      return item.markdownIndexEntry;
+    }).join("\n");
+    process.stdout.write(output);
   });
 }

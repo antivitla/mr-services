@@ -6,7 +6,7 @@ function extractDate (contentInfoObject) {
     var titleParts = contentInfoObject.title.split(",");
     var datePartString = titleParts[0].trim();
     var momentFrom = {
-      content: moment(datePartString, ["D MMMM", "D MMMM YYYY", "MMMM"], "ru"),
+      content: moment(contentInfoObject.title, ["D MMMM", "D MMMM YYYY", "MMMM"], "ru"),
       context: moment(contentInfoObject.date ? contentInfoObject.date : new Date())
     }
     if (momentFrom.content.isValid()) {

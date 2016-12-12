@@ -1,38 +1,14 @@
 {
   "name": "mr-services",
   "version": "1.0.0",
-  "description": "Productivity utilities",
-  "main": "index.js",
+  "description": "",
+  "main": "store.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/antivitla/mr-services.git"
-  },
-  "author": "Виталий Кулешин <antivitla@gmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/antivitla/mr-services/issues"
-  },
-  "homepage": "https://github.com/antivitla/mr-services#readme",
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "autosize": "^3.0.17",
-    "chalk": "^1.1.3",
-    "chance": "^1.0.4",
-    "event-stream": "^3.3.4",
-    "gulp": "^3.9.1",
-    "md5": "^2.2.1",
-    "mocha": "^3.1.2",
-    "moment": "^2.15.2",
-    "moment-parseformat": "^2.1.4",
-    "node-uuid": "^1.4.7",
-    "q": "^1.4.1",
-    "radio": "^0.2.0",
-    "sanitize-filename": "^1.6.1",
-    "slug": "^0.9.1",
-    "translit": "0.0.1",
-    "translit-russian": "0.0.2",
-    "vinyl": "^2.0.0"
+    "sorted-array": "^2.0.1"
   }
 }

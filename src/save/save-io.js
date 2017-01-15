@@ -1,5 +1,5 @@
-var save = require("./save");
+const save = require('./save');
 
-process.stdin.on("data", function (chunk) {
-  var result = save(JSON.parse(chunk.toString("utf8")));
+process.stdin.on('data', (chunk) => {
+  save(JSON.parse(chunk.toString()));
 });

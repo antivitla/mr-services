@@ -1,9 +1,9 @@
-function pickProperties (contentObject) {
-  var commentsRegexp = /<!--(.|\s)*?-->/g;
+function pickProperties(contentObject) {
+  const commentsRegexp = /<!--(.|\s)*?-->/g;
   if (contentObject.content.match(commentsRegexp)) {
     try {
-      var properties = JSON.parse(contentObject.content.match(commentsRegexp)[0]
-        .replace(/<!--|-->/g,"")
+      const properties = JSON.parse(contentObject.content.match(commentsRegexp)[0]
+        .replace(/<!--|-->/g, '')
         .trim());
       return properties;
     } catch (error) {

@@ -6,7 +6,7 @@ var params = process.argv.slice(3);
 
 switch (command) {
   case "add":
-    add(params);
+    addNote(params);
     break;
   case "archive":
     archive(params);
@@ -28,6 +28,11 @@ function archive (files) {
 }
 
 function add (params) {
+  // Либо пишем из командной строки, либо добавляем из файла - зависит от того
+  // есть ли второй параметр
+  if (!params[0]) {
+    // require("./create/create-item-io")()
+  }
   fs.access(params[0], function (error) {
     if (!error) {
       return require("./add/add-from-file")(params);

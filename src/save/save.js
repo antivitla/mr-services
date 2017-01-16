@@ -21,7 +21,7 @@ function saveMultiple(items, callback) {
     saveSingle(item, (error) => {
       if (error) console.log(error);
       progress += 1;
-      if (progress >= total) {
+      if (progress >= total && callback) {
         callback();
       }
     });

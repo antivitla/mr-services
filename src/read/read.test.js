@@ -3,6 +3,8 @@
 
 const assert = require('assert');
 const read = require('./read');
+const fs = require('fs-extra-promise');
+const tempfile = require('tempfile');
 
 describe('Read from input', function () {
   this.timeout(3000);
@@ -14,9 +16,25 @@ describe('Read from input', function () {
         done();
       })
       .catch((error) => {
-        console.log(error);
         assert.ok(false);
         done();
+      });
+  });
+});
+
+describe('Read from file', function () {
+  it('get data from file', function (done) {
+    const noteText = 'Как делишки, бро?';
+    // create and save file
+    const filename = tempfile('.md');
+    fs.outputFileAsync(filename, noteText, { encoding: 'utf8' })
+      .then(function () {
+        // read it through our module
+        read.file(filename)
+          .then(function (text) {
+            assert.equal(text, noteText);
+            done();
+          });
       });
   });
 });

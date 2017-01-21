@@ -2,6 +2,7 @@
 
 const es = require('event-stream');
 const moment = require('moment');
+const chalk = require('chalk');
 const uuid = require('node-uuid');
 const contentDelimiter = require('./content-delimiter');
 const extractDate = require('./extract-date');
@@ -11,9 +12,18 @@ const pickProperties = require('./pick-properties');
 // const createMarkdownIndexEntry = require('./create-markdown-index-entry');
 const transformContentAndKeepContext = require('./transform-content-and-keep-context');
 
+function renderParseProgressEnd(index) {
+  console.log(chalk.gray('Parsed'), chalk.green(index.length), chalk.gray('notes'));
+}
 
-function parse(string, contextObject) {
-  const currentContextObject = contextObject || { date: moment().toISOString() };
+function renderParseProgress(item) {
+  console.log(chalk.gray('Parsed'),
+    chalk.white(item.id),
+    chalk.green(item.excerpt));
+}
+
+function parse(string, { contextObject = { date: moment().toISOString() }, showProgress = true } = {}) {
+  // const currentContextObject = contextObject;
   return new Promise((resolve, reject) => {
     const index = [];
     // const deferred = q.defer();
@@ -63,7 +73,7 @@ function parse(string, contextObject) {
     .pipe(es.map((contentObject, next) => {
       transformContentAndKeepContext({
         contentObject,
-        contextObject: currentContextObject,
+        contextObject,
         keys: ['date'],
         transform: extractDate,
       });
@@ -83,9 +93,20 @@ function parse(string, contextObject) {
       next(null, contentObject);
     }))
 
+    // progress
+    .pipe(es.map((contentObject, next) => {
+      if (showProgress) {
+        renderParseProgress(contentObject);
+      }
+      next(null, contentObject);
+    }))
+
     // resolve index of contentObject
     .pipe(es.wait((error) => {
       if (!error) {
+        if (showProgress) {
+          renderParseProgressEnd(index);
+        }
         resolve(index);
       } else {
         reject(error);

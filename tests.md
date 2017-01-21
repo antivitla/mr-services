@@ -6,13 +6,13 @@
 
 Заметка выражает некую **мысль**. 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Заметка\2016-12-27 Заметка.md", date: {created: 1482960858580, updated: 1482923668744}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Заметка\\2016-12-27 Заметка.md", "date": {"created": 1482960858580, "updated": 1482923668744}} -->
 
 * * *
 
 Заметка либо принадлежит какому-то проекту, либо начинает новый проект. Группирока - это не то же самое что и деление на проекты
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Заметка\Заметка - элемент процесса познания.md", date: {created: 1482960858608, updated: 1482923118079}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Заметка\\Заметка - элемент процесса познания.md", "date": {"created": 1482960858608, "updated": 1482923118079}} -->
 
 * * *
 
@@ -20,7 +20,7 @@
 2. Заметка это не только мысль, а и количество слов, и программная форма - текстовый это или вородовский файл,  веб-страница ли. А раз так, то имеет значение где его редактировать можно.
 3. Заметка это всегда ответ на некий вопрос, и попытка ответить на несколько вопросов подразумевает общий вопрос. Если он неясен - то и ответы воспримутся неясно.
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Заметка\Заметка.draft 1.md", date: {created: 1482960858609, updated: 1481556725941}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Заметка\\Заметка.draft 1.md", "date": {"created": 1482960858609, "updated": 1481556725941}} -->
 
 * * *
 
@@ -59,7 +59,7 @@
 Получается я могу в общем-то оправдать любое свое действие )) А с другой стороны - диалектику тоже не я придумал - поэтому может так случиться что по чеснаку я и не смогу оправдать его ) Теоретически чисто мысленно да, а... "на другом уровне"? Ой, слишком сложно опять.
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Заметка\Заметка.md", date: {created: 1482960858610, updated: 1481056595148}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Заметка\\Заметка.md", "date": {"created": 1482960858610, "updated": 1481056595148}} -->
 
 * * *
 
@@ -81,7 +81,7 @@
   б) Я сам, как инструмент
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Осмысление\Осмысление.draft 1.md", date: {created: 1482960858641, updated: 1480971114143}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Осмысление\\Осмысление.draft 1.md", "date": {"created": 1482960858641, "updated": 1480971114143}} -->
 
 * * *
 
@@ -219,7 +219,7 @@
 Структура и действия процесса познания составляют инфраструктуру и UI сервиса.
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Осмысление\Осмысление.draft 2.md", date: {created: 1482960858672, updated: 1480971240910}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Осмысление\\Осмысление.draft 2.md", "date": {"created": 1482960858672, "updated": 1480971240910}} -->
 
 * * *
 
@@ -243,7 +243,7 @@
 
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Осмысление\Осмысление.draft 3.md", date: {created: 1482960858705, updated: 1480976859304}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Осмысление\\Осмысление.draft 3.md", "date": {"created": 1482960858705, "updated": 1480976859304}} -->
 
 * * *
 
@@ -269,7 +269,7 @@
 
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Осмысление\Осмысление.draft 4.md", date: {created: 1482960858752, updated: 1480979589910}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Осмысление\\Осмысление.draft 4.md", "date": {"created": 1482960858752, "updated": 1480979589910}} -->
 
 * * *
 
@@ -288,7 +288,7 @@
 Делая продукт, разрабатывая, отвечая на проблемы и формулируя их, исследуя - смогу ли я изучить и овладеть искусством мышления? И да и нет. Скорее нет, точнее тут всё вместе. Короче говоря кажется первое туду - попытаться завершить изучение диалектики, канта, гегеля.
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Осмысление\Осмысление.draft 5.md", date: {created: 1482960858764, updated: 1481032265845}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Осмысление\\Осмысление.draft 5.md", "date": {"created": 1482960858764, "updated": 1481032265845}} -->
 
 * * *
 
@@ -310,7 +310,7 @@
 
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Сценарии\Выведение сценариев.md", date: {created: 1482960858765, updated: 1481709238230}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Сценарии\\Выведение сценариев.md", "date": {"created": 1482960858765, "updated": 1481709238230}} -->
 
 * * *
 
@@ -371,7 +371,7 @@
 
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Выведение заметок.md", date: {created: 1482960858769, updated: 1482923231354}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Выведение заметок.md", "date": {"created": 1482960858769, "updated": 1482923231354}} -->
 
 * * *
 
@@ -383,7 +383,7 @@
 
 Модуль сохранения. Где и как он хранит - я не знаю и мне плевать. Первая граница - модуль сохранения и всё остальное.
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Сценарии\Общее место.md", date: {created: 1482960858769, updated: 1481559599744}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Сценарии\\Общее место.md", "date": {"created": 1482960858769, "updated": 1481559599744}} -->
 
 * * *
 
@@ -422,7 +422,7 @@
 Получается я могу в общем-то оправдать любое свое действие )) А с другой стороны - диалектику тоже не я придумал - поэтому может так случиться что по чеснаку я и не смогу оправдать его ) Теоретически чисто мысленно да, а... "на другом уровне"? Ой, слишком сложно опять.
 
 
-<!-- {filename: "..\docs\Заметка\Заметка.md", date: {created: 1481037970498, updated: 1481056595148}} -->
+<!-- {"filename": "..\\docs\\Заметка\\Заметка.md", "date": {"created": 1481037970498, "updated": 1481056595148}} -->
 
 * * *
 
@@ -430,13 +430,13 @@
 2. Заметка это не только мысль, а и количество слов, и программная форма - текстовый это или вородовский файл,  веб-страница ли. А раз так, то имеет значение где его редактировать можно.
 3. Заметка это всегда ответ на некий вопрос, и попытка ответить на несколько вопросов подразумевает общий вопрос. Если он неясен - то и ответы воспримутся неясно.
 
-<!-- {filename: "..\docs\Заметка\Заметка.draft 1.md", date: {created: 1481556109112, updated: 1481556725941}} -->
+<!-- {"filename": "..\\docs\\Заметка\\Заметка.draft 1.md", "date": {"created": 1481556109112, "updated": 1481556725941}} -->
 
 * * *
 
 Заметка либо принадлежит какому-то проекту, либо начинает новый проект. Группирока - это не то же самое что и деление на проекты
 
-<!-- {filename: "..\docs\Заметка\Заметка - элемент процесса познания.md", date: {created: 1481653344191, updated: 1482923118079}} -->
+<!-- {"filename": "..\\docs\\Заметка\\Заметка - элемент процесса познания.md", "date": {"created": 1481653344191, "updated": 1482923118079}} -->
 
 * * *
 
@@ -448,9 +448,9 @@
 
 Заметка выражает некую **мысль**. 
 
-<!-- {filename: "..\docs\Заметка\2016-12-27 Заметка.md", date: {created: 1482852138177, updated: 1482923668744}} -->
+<!-- {"filename": "..\\docs\\Заметка\\2016-12-27 Заметка.md", "date": {"created": 1482852138177, "updated": 1482923668744}} -->
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Заметка.md", date: {created: 1482960858770, updated: 1482957751448}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Заметка.md", "date": {"created": 1482960858770, "updated": 1482957751448}} -->
 
 * * *
 
@@ -471,7 +471,7 @@
 
 Мышление (диалектика). Эмоции (критерии). Расписание (время)
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Осмысление.md", date: {created: 1482960858813, updated: 1481653280555}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Осмысление.md", "date": {"created": 1482960858813, "updated": 1481653280555}} -->
 
 * * *
 
@@ -489,13 +489,13 @@
 1. Зародыш тоже сразу цельный и обладает зародышевыми органами
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Разработка.md", date: {created: 1482960858825, updated: 1481557894410}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Разработка.md", "date": {"created": 1482960858825, "updated": 1481557894410}} -->
 
 * * *
 
 **Журнал** - последовательно по дате расположенные в одном файле заметки, как-то друг от друга разделённые.
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Словарь.md", date: {created: 1482960858841, updated: 1482923850654}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Словарь.md", "date": {"created": 1482960858841, "updated": 1482923850654}} -->
 
 * * *
 
@@ -503,7 +503,7 @@
 
 Я создаю не только заметки. Как только появляется несколько заметок, а затем усложняются отношения между ними - я обнаруживаю себя создающим **структуру** уже, сразу же. Я одновременно создаю несколько файлов - в рамках найденной на данный момент структуры. Их сложнее объединить в журнал, но можно - по текстам созданным мной.
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Структура заметок.md", date: {created: 1482960858859, updated: 1482924465556}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Структура заметок.md", "date": {"created": 1482960858859, "updated": 1482924465556}} -->
 
 * * *
 
@@ -519,10 +519,10 @@ journal-it *.* > заметка.journal.md
 
 
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\Туду.md", date: {created: 1482960858860, updated: 1482954431323}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\Туду.md", "date": {"created": 1482960858860, "updated": 1482954431323}} -->
 
 * * *
 
 И вот я сделал вывод в журнал нескольких файлов заметок.
 
-<!-- {filename: "f:\Projects\Personal\Mr.Services\mr-services.git\test\что теперь.md", date: {created: 1482960858863, updated: 1482935791129}} -->
+<!-- {"filename": "f:\\Projects\\Personal\\Mr.Services\\mr-services.git\\test\\что теперь.md", "date": {"created": 1482960858863, "updated": 1482935791129}} -->

@@ -4,6 +4,13 @@ const spawn = require('child_process').spawn;
 const tempfile = require('tempfile');
 const detect = require('jschardet').detect;
 const iconv = require('iconv-lite');
+const chalk = require('chalk');
+
+function renderReadProgress(text) {
+  console.log(chalk.gray('Read:'),
+    chalk.green(text.length),
+    chalk.gray('bytes'));
+}
 
 function editorPromise(command, filename) {
   return new Promise((resolve, reject) => {
@@ -18,7 +25,7 @@ function editorPromise(command, filename) {
   });
 }
 
-function input(initial) {
+function input(initial, { showProgress = false } = {}) {
   const editorCommand = os.platform().match(/win/g) ? 'notepad' : 'nano';
   const editFile = tempfile('.md');
   return new Promise((resolve, reject) => {
@@ -33,6 +40,9 @@ function input(initial) {
           'windows-1251': 'win1251',
         };
         const decoded = iconv.decode(data, encoding[detect(data).encoding]);
+        if (showProgress) {
+          renderReadProgress(decoded);
+        }
         resolve(decoded);
       })
       .catch((error) => {
@@ -41,11 +51,19 @@ function input(initial) {
   });
 }
 
-function file() {
-  console.log('read from file');
+function file(filename, { showProgress = false } = {}) {
+  return new Promise((resolve, reject) => {
+    fs.readFileAsync(filename)
+      .then((text) => {
+        if (showProgress) {
+          renderReadProgress(text);
+        }
+        resolve(text);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }
 
-module.exports = {
-  input,
-  file,
-};
+module.exports = { input, file };

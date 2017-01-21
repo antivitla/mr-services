@@ -20,7 +20,7 @@ describe('Parse', function () {
   it('parses note with context', function (done) {
     const note = 'Заметка';
     const date = moment().toISOString();
-    parse(note, { date }).then(function (index) {
+    parse(note, { contextObject: { date } }).then(function (index) {
       assert.ok(index[0]);
       assert.ok(index[0].id);
       assert.equal(index[0].date, date);

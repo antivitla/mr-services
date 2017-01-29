@@ -1,38 +1,42 @@
-const fs = require('fs-extra');
+const fs = require('fs-extra-promise');
+const chalk = require('chalk');
 const md = require('../markdown/markdown');
 
-function saveSingle(item, callback) {
+function saveSingle(item) {
   const filename = `.mr/content/${item.id.slice(0, 2)}/${item.id.slice(2)}.md`;
-  fs.mkdirs(`.mr/content/${item.id.slice(0, 2)}`, (error) => {
-    if (!error) {
-      fs.writeFile(filename, md.stringify(item), (err) => {
-        if (callback) callback(err);
+  return new Promise((resolve, reject) => {
+    fs.outputFileAsync(filename, md.stringify(item))
+      .then(() => {
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
       });
-    } else if (callback) {
-      callback(error);
-    }
   });
 }
 
-function saveMultiple(items, callback) {
+function saveMultiple(items) {
   const total = items.length;
   let progress = 0;
-  items.forEach((item) => {
-    saveSingle(item, (error) => {
-      if (error) console.log(error);
-      progress += 1;
-      if (progress >= total && callback) {
-        callback();
-      }
+  return new Promise((resolve, reject) => {
+    items.forEach((item) => {
+      saveSingle(item)
+        .then(() => {
+          progress += 1;
+          if (progress >= total) {
+            resolve();
+          }
+        })
+        .catch((error) => {
+          progress += 1;
+          reject(error);
+        });
     });
   });
 }
 
-function save(data, callback) {
-  if (Array.isArray(data)) {
-    return saveMultiple(data, callback);
-  }
-  return saveSingle(data, callback);
+function save(data) {
+  return saveMultiple((Array.isArray(data) ? data : [data]));
 }
 
 module.exports = save;

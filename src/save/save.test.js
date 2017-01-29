@@ -12,18 +12,17 @@ describe('Save items', function () {
       const input = index[0];
       const filepath = `.mr/content/${input.id.slice(0, 2)}/${input.id.slice(2)}.md`;
       // сохраняем
-      save(input, function (error) {
-        if (!error) {
-          // читаем
+      save(input)
+        .then(function () {
           fs.access(filepath, fs.constants.R_OK, function (err) {
             assert.ok(!err);
             done();
           });
-        } else {
+        })
+        .catch(function () {
           assert.ok(false);
           done();
-        }
-      });
+        });
     });
   });
 
@@ -33,18 +32,18 @@ describe('Save items', function () {
       const filepath = `.mr/content/${input.id.slice(0, 2)}/${input.id.slice(2)}.md`;
       const contentLength = md.stringify(input).length;
       // сохраняем
-      save(input, function (error) {
-        if (!error) {
+      save(input)
+        .then(function () {
           // читаем
           fs.readFile(filepath, function (err, data) {
             assert.equal(data.toString('utf8').length, contentLength);
             done();
           });
-        } else {
+        })
+        .catch(function () {
           assert.ok(false);
           done();
-        }
-      });
+        });
     });
   });
 
@@ -62,15 +61,14 @@ describe('Save items', function () {
         md.stringify(items[2]).length,
       ];
 
-      save(items, function (error) {
-        if (!error) {
+      save(items)
+        .then(function () {
           const i = parseInt(Math.random() * 3, 10);
           fs.readFile(filepaths[i], function (err, data) {
             assert.equal(data.toString('utf8').length, contentLengths[i]);
             done();
           });
-        }
-      });
+        });
     });
   });
 

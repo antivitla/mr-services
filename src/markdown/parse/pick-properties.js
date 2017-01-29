@@ -5,7 +5,9 @@ function pickProperties(contentObject) {
       const properties = JSON.parse(contentObject.content.match(commentsRegexp)[0]
         .replace(/<!--|-->/g, '')
         .trim());
-      return properties;
+      return Object.assign({}, contentObject, properties, {
+        content: contentObject.content.replace(commentsRegexp, '').trim(),
+      });
     } catch (error) {
       console.error(error);
     }

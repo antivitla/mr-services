@@ -2,7 +2,9 @@
 
 function transformContentAndKeepContext(obj) {
   obj.keys.forEach((key) => {
-    obj.contentObject[key] = obj.contextObject[key];
+    if (obj.contentObject[key] === undefined) {
+      obj.contentObject[key] = obj.contextObject[key];
+    }
   });
   Object.assign(obj.contentObject, obj.transform(obj.contentObject, obj.transformOptions));
   obj.keys.forEach((key) => {

@@ -25,7 +25,7 @@ function extractDate(contentObject) {
       };
     }
   }
-  return undefined;
+  return contentObject;
 }
 
 module.exports = extractDate;

@@ -4,7 +4,6 @@ const spawn = require('child_process').spawn;
 const tempfile = require('tempfile');
 const detect = require('jschardet').detect;
 const iconv = require('iconv-lite');
-const chalk = require('chalk');
 
 function editorPromise(command, filename) {
   return new Promise((resolve, reject) => {

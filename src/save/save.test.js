@@ -3,7 +3,7 @@
 
 const assert = require('assert');
 const save = require('./save');
-const fs = require('fs-extra');
+const fs = require('fs-extra-promise');
 const md = require('../markdown/markdown');
 
 describe('Save items', function () {
@@ -12,15 +12,13 @@ describe('Save items', function () {
       const input = index[0];
       const filepath = `.mr/content/${input.id.slice(0, 2)}/${input.id.slice(2)}.md`;
       // сохраняем
-      save(input)
+      save(index)
         .then(function () {
-          fs.access(filepath, fs.constants.R_OK, function (err) {
-            assert.ok(!err);
-            done();
-          });
-        })
-        .catch(function () {
-          assert.ok(false);
+          if (fs.existsSync(filepath)) {
+            assert.ok(true);
+          } else {
+            assert.ok(false);
+          }
           done();
         });
     });
@@ -32,7 +30,7 @@ describe('Save items', function () {
       const filepath = `.mr/content/${input.id.slice(0, 2)}/${input.id.slice(2)}.md`;
       const contentLength = md.stringify(input).length;
       // сохраняем
-      save(input)
+      save(index)
         .then(function () {
           // читаем
           fs.readFile(filepath, function (err, data) {

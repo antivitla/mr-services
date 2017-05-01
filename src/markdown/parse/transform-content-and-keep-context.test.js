@@ -5,9 +5,11 @@ const assert = require('assert');
 const transformContentAndKeepContext = require('./transform-content-and-keep-context');
 
 function transformExample(contentObject) {
+  const m = new Date(contentObject.date);
+  m.setMonth(0);
   return {
     makabot: `Marmelad ${contentObject.makabot}`,
-    date: contentObject.date.setMonth(1),
+    date: m,
   };
 }
 
@@ -28,6 +30,6 @@ describe('Transfrom through context', function () {
     }));
     assert.equal(contextObject.makabot, 'Marmelad Vitla');
     assert.equal(contentObject.makabot, 'Marmelad Vitla');
-    assert.equal((new Date(contentObject.date)).getMonth(), 1);
+    assert.equal((new Date(contentObject.date)).getMonth(), 0);
   });
 });

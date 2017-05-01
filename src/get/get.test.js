@@ -7,6 +7,8 @@ const md = require('../markdown/markdown');
 const save = require('../save/save');
 const get = require('../get/get');
 
+console.log('gettest md', get.md);
+
 describe('Get notes', function () {
   it('get note by id', function (done) {
     // create and save note
@@ -19,7 +21,7 @@ describe('Get notes', function () {
         // save it now
         return save(index);
       })
-      .then(() => get(id))
+      .then(() => get({ id }))
       .then((item) => {
         assert.equal(item[0].content, note);
         done();
@@ -27,6 +29,26 @@ describe('Get notes', function () {
       .catch((error) => {
         console.log(error);
         done();
+      });
+  });
+
+  it('get all notes', function (done) {
+    const n1 = 'My note No. 1';
+    const n2 = 'My note No. 2';
+    const n3 = 'My note No. 3';
+    md.parse(n1)
+      .then(index => save(index))
+      .then(() => md.parse(n2))
+      .then(index => save(index))
+      .then(() => md.parse(n3))
+      .then(index => save(index))
+      .then(() => get())
+      .then((notes) => {
+        assert.ok(notes.length >= 3);
+        done();
+      })
+      .catch((error) => {
+        console.log(error);
       });
   });
 

@@ -6,11 +6,11 @@ const read = require('./read');
 const fs = require('fs-extra-promise');
 const tempfile = require('tempfile');
 
-describe('Read from input', function () {
-  this.timeout(3000);
+xdescribe('Read from editor', function () {
+  this.timeout(10000);
   it('gets data from spawned process', function (done) {
     const note = 'Текст заметки...';
-    read.input(note)
+    read.editor(note)
       .then((text) => {
         assert.equal(text, note);
         done();

@@ -33,7 +33,11 @@ function readEditor(initial) {
           'UTF-8': 'utf8',
           'windows-1251': 'win1251',
         };
-        const dataEncoding = detect(data).encoding ? encoding[detect(data).encoding] : 'utf8';
+
+        let dataEncoding = detect(data).encoding;
+        if (!dataEncoding || !encoding[dataEncoding]) {
+          dataEncoding = process.platform.match(/win/) ? 'win1251' : 'utf8';
+        }
         const decoded = iconv.decode(data, dataEncoding);
         resolve(decoded);
       })

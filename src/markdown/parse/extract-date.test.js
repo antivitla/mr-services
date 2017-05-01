@@ -82,4 +82,25 @@ describe('Extract date', function () {
     assert.equal(moment(newContentObject.date).year(), (new Date()).getFullYear());
     assert.equal(moment(newContentObject.date).month(), 7);
   });
+
+  it('should catch year', function () {
+    const contentObject = {
+      title: '2006, Универсальный инструмент',
+      content: 'Всё что я вижу и хочу (выделить) убрать (но сохранив чтоб можно было вернуться) с глаз долой.',
+      date: moment(new Date()).toISOString(),
+    };
+    const newContentObject = Object.assign(contentObject, extractDate(contentObject));
+    assert.equal(moment(newContentObject.date).year(), 2006);
+  });
+
+  it('should catch month and year', function () {
+    const contentObject = {
+      title: 'сентябрь 2006, Универсальный инструмент',
+      content: 'Всё что я вижу и хочу (выделить) убрать (но сохранив чтоб можно было вернуться) с глаз долой.',
+      date: moment(new Date()).toISOString(),
+    };
+    const newContentObject = Object.assign(contentObject, extractDate(contentObject));
+    assert.equal(moment(newContentObject.date).year(), 2006);
+    assert.equal(moment(newContentObject.date).month(), 8);
+  });
 });

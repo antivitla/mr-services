@@ -14,13 +14,15 @@ describe('Output content objects', function () {
     const index = [{
       title: 'Title 1',
       content: 'Content 1',
+      zok: 'Zok',
     }, {
       title: 'Title 2',
       content: 'Content 2',
+      zok: 'Zok',
     }];
     const answer = [
-      `# Title 1${lineDivider}Content 1${lineDivider}<!-- ${JSON.stringify({"title":"Title 1"})} -->`,
-      `# Title 2${lineDivider}Content 2${lineDivider}<!-- ${JSON.stringify({"title":"Title 2"})} -->`,
+      `# Title 1${lineDivider}Content 1${lineDivider}<!-- ${JSON.stringify({"zok":"Zok"})} -->`,
+      `# Title 2${lineDivider}Content 2${lineDivider}<!-- ${JSON.stringify({"zok":"Zok"})} -->`,
     ];
     const output = index.map(stringify);
     output.forEach(function (o, i) {
@@ -35,7 +37,7 @@ describe('Output content objects', function () {
       title: 'Title 2',
       content: 'Content 2',
     }];
-    const answer = ['Content 1', `# Title 2${lineDivider}Content 2${lineDivider}<!-- {"title":"Title 2"} -->`];
+    const answer = ['Content 1', `# Title 2${lineDivider}Content 2`];
     const output = index.map(stringify);
     output.forEach(function (o, i) {
       assert.equal(o, answer[i]);
@@ -48,7 +50,7 @@ describe('Output content objects', function () {
     }, {
       title: 'Title 2',
     }];
-    const answer = ['Content 1', `# Title 2${lineDivider}<!-- {"title":"Title 2"} -->`];
+    const answer = ['Content 1', `# Title 2`];
     const output = index.map(stringify);
     output.forEach(function (o, i) {
       assert.equal(o, answer[i]);
@@ -61,7 +63,7 @@ describe('Output content objects', function () {
       title: 'Title 2',
       content: 'Content 1',
     }];
-    const answer = ['', `# Title 2${lineDivider}Content 1${lineDivider}<!-- {"title":"Title 2"} -->`];
+    const answer = ['', `# Title 2${lineDivider}Content 1`];
     const output = index.map(stringify);
     output.forEach(function (o, i) {
       assert.equal(o, answer[i]);
@@ -77,8 +79,8 @@ describe('Output content objects', function () {
       content: 'Content 2',
     }];
     const answer = [
-      `# Title 1${lineDivider}Content 1${lineDivider}<!-- ${JSON.stringify({"title":"Title 1"})} -->`,
-      `# Title 2${lineDivider}Content 2${lineDivider}<!-- ${JSON.stringify({"title":"Title 2"})} -->`,
+      `# Title 1${lineDivider}Content 1`,
+      `# Title 2${lineDivider}Content 2`,
     ].join(`${lineDivider}* * *${lineDivider}`);
     assert.equal(answer, stringify(index));
   });

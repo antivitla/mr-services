@@ -1,5 +1,5 @@
 function pickProperties(contentObject) {
-  const commentsRegexp = /<!--(.|\s)*?-->/g;
+  const commentsRegexp = /(^|\r\n|\n)<!--(.|\s)*?-->/g;
   if (contentObject.content.match(commentsRegexp)) {
     try {
       const properties = JSON.parse(contentObject.content.match(commentsRegexp)[0]

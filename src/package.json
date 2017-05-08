@@ -25,6 +25,7 @@
     "marked-terminal": "^2.0.0",
     "moment": "^2.17.1",
     "node-uuid": "^1.4.7",
+    "prompt": "^1.0.0",
     "prompt-promise": "^1.0.3",
     "tempfile": "^1.1.1"
   },

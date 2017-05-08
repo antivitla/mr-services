@@ -1,14 +1,14 @@
-const fs = require('fs');
 const chalk = require('chalk');
-const os = require('os');
 const Content = require('../content/content');
-const db = require('../db/db');
 const dialog = require('../dialog/dialog');
 const md = require('../md/md');
 const readFiles = require('./nuka-read-files');
 
-function saveNode(pattern) {
-  readFiles(pattern, (filename, data, callback) => {
+function readNode(pattern) {
+  // Собираем список узлов
+  const nodeList = [];
+  // Проходим по каждому файлу из списка
+  return readFiles(pattern, (filename, data, nextFile) => {
     // Парсим текст в контент-объекты
     md.parse(data.text, { date: data.date })
     .then((index) => {
@@ -31,38 +31,37 @@ function saveNode(pattern) {
       return contentObject;
     })
     // Утверждаем у пользователя имя узла и его контент
-    .then(contentObject => new Promise((resolve) => {
-      console.log(dialog.stringify(contentObject));
-      dialog.falseConfirm(`Изменить название '${contentObject.title}'?`, 'вписать')
-      .then((title) => {
-        resolve(Object.assign(contentObject, { title }));
-      })
-      .catch(() => {
-        resolve(contentObject);
-      });
-    }))
-    // Сохраняем узел в базу
+    .then(contentObject => dialog.confirmContentAndTitle(contentObject))
+    // // Сохраняем узел и его контент в базу
+    // .then((contentObject) => {
+    //   const index = [contentObject].concat(contentObject.index);
+    //   index.forEach((item) => {
+    //     db.write({ id: item.id, text: md.stringify([item]) }, { home });
+    //   });
+    //   return contentObject;
+    // })
+    // // Перезаписываем исходный файл пользователя
+    // .then((contentObject) => {
+    //   const index = contentObject.index;
+    //   const text = md.stringify([contentObject].concat(index));
+    //   return fs.outputFileAsync(filename, text);
+    // })
+    // Добавляем узел в список
     .then((contentObject) => {
-      const index = [contentObject].concat(contentObject.index);
-      index.forEach((item) => {
-        db.write({ id: item.id, text: md.stringify([item]) }, { home: '.' });
-      });
-      return contentObject;
-    })
-    // Перезаписываем исходный файл пользователя
-    .then((contentObject) => {
-      const index = contentObject.index;
-      const text = md.stringify([contentObject].concat(index));
-      return fs.outputFileAsync(filename, text);
+      nodeList.push(contentObject);
+      return true;
     })
     // Сигнализируем завершение
-    .then(() => callback());
+    .then(() => nextFile())
+    .catch((error) => {
+      if (error) {
+        console.log(chalk.red(error));
+      }
+      nextFile();
+    });
   })
-  .catch((error) => {
-    if (error === '404') {
-      console.log(chalk.gray(`${os.EOL}Не найдено файлов ${pattern}${os.EOL}`));
-    }
-  });
+  // Отдаём список узлов
+  .then(() => nodeList);
 }
 
-module.exports = saveNode;
+module.exports = readNode;

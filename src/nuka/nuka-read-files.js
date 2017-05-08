@@ -3,24 +3,12 @@ const fs = require('fs-extra-promise');
 const async = require('async');
 const chalk = require('chalk');
 const safePattern = require('./nuka-safe-pattern');
+const fileDate = require('./nuka-file-date');
 
 const excludePatterns = [
   '!**/node_modules/**',
   '!**/bower_components/**',
 ];
-
-function fileDate(filename) {
-  return new Promise((resolve, reject) => {
-    fs.stat(filename, (error, stat) => {
-      if (error) {
-        reject(error);
-      } else {
-        const date = stat.birthtime < stat.time ? stat.birthtime : stat.ctime;
-        resolve(date);
-      }
-    });
-  });
-}
 
 function readFiles(userPattern, forEachCallback) {
   return new Promise((resolve, reject) => {

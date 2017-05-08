@@ -287,21 +287,82 @@ program
 
 // Save
 program
-  .command('save')
-  .option('-t, --tree [tree]', 'Сохранить дерево файлов')
-  .option('-n, --node [node]', 'Сохранить узел заметок')
-  .option('-c, --content [content]', 'Сохранить контент')
-  .action(({ tree, node } = {}) => {
-    if (tree) {
-      nuka.readFiles(tree !== true ? tree : '', (filename, data, callback) => {
-        console.log(chalk.gray(`${filename}`));
-        callback();
-      });
-    }
-    if (node) {
-      nuka.saveNode(node);
-    }
-  });
+.command('save')
+.option('-t, --tree [pattern]', 'Сохранить дерево файлов по маске')
+.option('-n, --node [pattern]', 'Сохранить узлы заметок-файлов по маске')
+.option('-c, --content [pattern]', 'Сохранить сами заметки в файлах по маске')
+.option('-e, --editor [text]', 'Сохранить заметки через редактор')
+.option('-s, --nosave', 'Не сохранять в базу')
+.option('-r, --noreplace', 'Не перезаписывать исходные файлы')
+.option('-i, --silent', 'Без подтверждений')
+.option('-x, --expand', 'Экспорт деревьев и узлов красиво и без скрытых комментов')
+.option('-o, --stdout', 'Вывод результата на экран или в файл (с помощью символа перенаправления вывода ОС)')
+.option('-b, --build', 'Строим дерево файлов по карте')
+.action(({ tree, node, content, editor, nosave, noreplace, silent, expand, stdout } = {}) => {
+  // Сохраняем заметки
+  if (content) {
+    // Добавляем заметки из файлов по маске
+    nuka.readContent(content, { home: '.' })
+    .then((contentList) => {
+      console.log(contentList.length);
+      // 1. сохраняем эти заметки в базу
+      // 2. перезаписываем ли мы исходные файлы?
+    })
+    .catch((error) => {
+      if (error === '404') {
+        // Если файлов с таким названием не найдено,
+        // просто сохраняем этот текст как новую заметку
+      } else {
+        console.red(error);
+      }
+    });
+  }
+  // Через редактор
+  if (editor) {
+    nuka.readEditor(editor !== true ? editor : '', { home: '.' })
+    .then((contentList) => {
+      console.log(contentList);
+      // 1. сохраняем эту заметку в базу
+    })
+    .catch((error) => {
+      if (error) {
+        console.red(error);
+      }
+    });
+  }
+  // Сохраняем дерево файлов
+  if (tree) {
+    nuka.readTree(tree, { home: '.' })
+    .then((treeObject) => {
+      console.log(treeObject);
+      // 1. сохраняем эти заметки в базу
+      // 2. перезаписываем ли мы исходные файлы?
+    })
+    .catch((error) => {
+      if (error === '404') {
+        console.log(chalk.gray(`${os.EOL}Не найдено узлов по маске '${nuka.safePattern(tree)}'${os.EOL}`));
+      } else {
+        console.red(error);
+      }
+    });
+  }
+  // Сохраняем узлы
+  if (node) {
+    nuka.readNode(node, { home: '.' })
+    .then((nodeList) => {
+      console.log(nodeList);
+      // 1. сохраняем эти заметки в базу
+      // 2. перезаписываем ли мы исходные файлы?
+    })
+    .catch((error) => {
+      if (error === '404') {
+        console.log(chalk.gray(`${os.EOL}Не найдено узлов по маске '${nuka.safePattern(node)}'${os.EOL}`));
+      } else {
+        console.red(error);
+      }
+    });
+  }
+});
 
 // Parse command line arguments
 program.parse(process.argv);

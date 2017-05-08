@@ -2,7 +2,7 @@
 /* eslint prefer-arrow-callback: 0, func-names: 0 */
 
 const moment = require('moment');
-const md = require('../markdown/markdown');
+const md = require('../md/md');
 const assert = require('assert');
 const sort = require('./sort');
 

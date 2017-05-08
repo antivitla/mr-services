@@ -1,9 +1,10 @@
 const os = require('os');
 const get = require('../get/get');
-const md = require('../markdown/markdown');
+const md = require('../md/md');
 const async = require('async');
 const fs = require('fs-extra-promise');
 const chalk = require('chalk');
+const uuid = require('node-uuid');
 
 const lineDivider = os.EOL.repeat(2);
 const itemDivider = `${lineDivider}* * *${lineDivider}`;
@@ -60,7 +61,7 @@ TreeNode.prototype.addChild = function (path, index) {
       parent: this,
       type: 'tree',
     }));
-    const addedChild = this.children[this.children.length - 1];
+    const addedChild = this.children.slice(-1)[0];
     if (path.length > 1) {
       addedChild.addChild(path.slice(1), index);
     } else if (index) {
@@ -125,7 +126,6 @@ TreeNode.prototype.findByTitle = function (title) {
 TreeNode.prototype.checkout = function ({ clean = false, home = '.' } = {}) {
   // Имеем ли мы собственные заметки - создаём файл
   if (this.index) {
-
     const content = [];
     async.eachSeries(this.index, (item, callback) => {
       get({ home, id: item.id })

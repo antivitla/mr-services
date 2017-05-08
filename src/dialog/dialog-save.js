@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const moment = require('moment');
 const prompt = require('prompt-promise');
 const os = require('os');
-const md = require('../markdown/markdown');
+const md = require('../md/md');
 const save = require('../save/save');
 
 function saveDialog(index, home = '.') {

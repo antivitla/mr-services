@@ -3,7 +3,7 @@
 
 const assert = require('assert');
 const fs = require('fs-extra-promise');
-const md = require('../markdown/markdown');
+const md = require('../md/md');
 const save = require('../save/save');
 const get = require('../get/get');
 

@@ -83,8 +83,14 @@ function refsStringify(home = '.') {
   return refsList(home).then(list => list.map(stringifyRef).join(os.EOL));
 }
 
+function refsGet(home = '.') {
+  //
+  console.log(home)
+}
+
 module.exports = {
   update: refsUpdate,
   list: refsList,
   stringify: refsStringify,
+  get: refsGet,
 };

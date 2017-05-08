@@ -6,22 +6,29 @@ const moment = require('moment');
 const os = require('os');
 const fs = require('fs-extra-promise');
 const glob = require('globby');
-// const uuid = require('node-uuid');
-// const prompt = require('prompt-promise');
-// const util = require('util');
-// const async = require('async');
-// const asyncParseFiles = require('./async-parse-files');
+const prompt = require('prompt-promise');
+const util = require('util');
+const marked = require('marked');
+const TerminalRenderer = require('marked-terminal');
+
 const read = require('./read/read');
 const options = require('./options/options');
 const refs = require('./refs/refs');
 const get = require('./get/get');
-const md = require('./markdown/markdown');
 const TreeNode = require('./tree/tree').node;
 const dialog = require('./dialog/dialog');
-const nuka = require('./nuka-commands/nuka-commands');
+
+const nuka = require('./nuka/nuka');
+const md = require('./md/md');
+const Content = require('./content/content');
+const db = require('./db/db');
 
 // Init
 moment.locale('ru');
+marked.setOptions({
+  // Define custom renderer
+  renderer: new TerminalRenderer()
+});
 
 // Load options
 const NukaOptions = options('mr.json');
@@ -57,6 +64,7 @@ function bySession(notes, days, dir) {
   return index;
 }
 
+
 // Usage
 program
   .version('0.0.1')
@@ -66,7 +74,8 @@ program
 program
   .command('options')
   .action(() => {
-    process.stdout.write(chalk.gray(`${os.EOL}${JSON.stringify(NukaOptions, null, '  ')}${os.EOL}`));
+    const result = JSON.stringify(NukaOptions, null, '  ');
+    process.stdout.write(chalk.gray(`${os.EOL}${result}${os.EOL}`));
   });
 
 // Add
@@ -78,18 +87,19 @@ program
   .action(({ note = '', file = '', tree = '' } = {}) => {
     if (note && note.length) {
       // Мы хотим добавить что-то прямо из командной строки
-      md.parse(note).then(index => dialog.save(index, NukaOptions.home));
-    } else if (file) {
+      md.parse(note)
+      .then(index => dialog.save(index, NukaOptions.home));
+    } else if (file && file !== true) {
       // Добавляем файл(ы)
-      nuka.addFiles(file, NukaOptions);
-    } else if (tree) {
+      nuka.addFile(file, NukaOptions);
+    } else if (tree && tree !== true) {
       // Строим структуру
       nuka.addTree(tree, NukaOptions);
     } else {
       // Или из редактора
       read.editor('')
-        .then(text => md.parse(text))
-        .then(index => dialog.save(index, NukaOptions.home));
+      .then(text => md.parse(text))
+      .then(index => dialog.save(index, NukaOptions.home));
     }
   });
 
@@ -221,18 +231,18 @@ program
 program
   .command('archive')
   .option('-s, --session', 'Arhive to session dated today')
-  .option('-f, --files [files]')
-  .action(({ session = false, files }) => {
+  .option('-f, --file [pattern]')
+  .action(({ session = false, file }) => {
     let path = '.archive';
-    const pattern = (files && files !== true) ? files : '**/*.*';
+    const pattern = (file && file !== true) ? file : '**/*.*';
     if (session) {
       const date = moment().format('YYYY-MM-DD');
       path += `/Session ${date}/`;
     }
     glob([pattern, '!**/node_modules/**', '!**/bower_components/**'])
-      .then((files) => {
-        files.forEach((file) => {
-          fs.move(file, path + file, { overwrite: true });
+      .then((filelist) => {
+        filelist.forEach((fileitem) => {
+          fs.move(fileitem, path + fileitem, { overwrite: true });
         });
       });
   });
@@ -255,6 +265,42 @@ program
             });
         }
       });
+  });
+
+// Start
+program
+  .command('start')
+  .option('-n, --node [node]', 'Start node')
+  .action(({ node } = {}) => {
+    // Создать новый узел (файл)
+    if (node && node !== true) {
+      const filename = `${node}.md`;
+      fs.outputFileAsync(filename, '')
+      .then(() => {
+        console.log(chalk.gray(`${os.EOL}Создан файл '${filename}'`));
+      })
+      .catch((error) => {
+        console.log(chalk.red(error));
+      });
+    }
+  });
+
+// Save
+program
+  .command('save')
+  .option('-t, --tree [tree]', 'Сохранить дерево файлов')
+  .option('-n, --node [node]', 'Сохранить узел заметок')
+  .option('-c, --content [content]', 'Сохранить контент')
+  .action(({ tree, node } = {}) => {
+    if (tree) {
+      nuka.readFiles(tree !== true ? tree : '', (filename, data, callback) => {
+        console.log(chalk.gray(`${filename}`));
+        callback();
+      });
+    }
+    if (node) {
+      nuka.saveNode(node);
+    }
   });
 
 // Parse command line arguments

@@ -4,7 +4,7 @@
 const assert = require('assert');
 // const save = require('./save');
 const fs = require('fs-extra-promise');
-// const md = require('../markdown/markdown');
+// const md = require('../md/md');
 const refs = require('./refs');
 
 describe('safe ref', function () {

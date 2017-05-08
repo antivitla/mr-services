@@ -1,5 +1,5 @@
 const fs = require('fs-extra-promise');
-const md = require('../markdown/markdown');
+const md = require('../md/md');
 
 function saveSingle(item, home = '.') {
   const filename = `${home}/.mr/content/${item.id.slice(0, 2)}/${item.id.slice(2)}.md`;

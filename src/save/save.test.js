@@ -4,7 +4,7 @@
 const assert = require('assert');
 const save = require('./save');
 const fs = require('fs-extra-promise');
-const md = require('../markdown/markdown');
+const md = require('../md/md');
 
 describe('Save items', function () {
   it('один итем за раз, правильный путь имеет', function (done) {

@@ -1,12 +1,12 @@
 const fs = require('fs-extra-promise');
 const glob = require('globby');
-const md = require('../markdown/markdown');
+const md = require('../md/md');
 
 function getById(id, home = '.') {
   return new Promise((resolve, reject) => {
     fs.readFileAsync(`${home}/.mr/content/${id.slice(0, 2)}/${id.slice(2)}.md`)
       .then((content) => {
-        // console.log(require('../markdown/markdown'));
+        // console.log(require('../md/md'));
         // console.log(md);
         md.parse(content)
           .then((index) => {

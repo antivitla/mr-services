@@ -1,10 +1,11 @@
 const chalk = require('chalk');
 const Content = require('../content/content');
+const fs = require('fs-extra-promise');
 const dialog = require('../dialog/dialog');
 const md = require('../md/md');
 const readFiles = require('./nuka-read-files');
 
-function readTree(pattern) {
+function readTree(pattern, { noreplace, silent }) {
   // Нам нужно составить плоский список узлов
   // с путями внутри дерева.
   // А затем собрать дерево, используя его
@@ -14,56 +15,62 @@ function readTree(pattern) {
   // Получаем список файлов и по одному обрабатываем
   return readFiles(pattern, (filename, data, nextFile) => {
     // Парсим файл
-    md.parse(data.text, { date: data.date })
-    .then((index) => {
-      // Конструируем контент-узел
-      const contentObject = new Content({ type: 'tree' });
-      if (index[0].type === 'tree') {
-        // Если первый объект это узел,
-        // то считаем его содержанием дальнейших заметок,
-        // и удаляем из списка
-        Object.assign(contentObject, index.shift());
-      } else {
-        // если нет, берём в качестве заголовка имя файла
-        contentObject.title = filename.split('/').slice(-1)[0].replace(/\.md$/, '');
-      }
-      // Сохраняем содержание
-      contentObject.index = index.slice(0);
-      // Дата
-      contentObject.date = contentObject.index ? contentObject.index[0].date : data.date;
-      // Проставляем путь
-      contentObject.path = filename.split('/').map(part => part.trim());
-      // Возвращаем
-      return contentObject;
-    })
+    let pipe = md.parse(data.text, { date: data.date })
+      .then((index) => {
+        // Сохраняем путь, пригодится
+        const path = filename.split('/');
+        // Конструируем контент-узел
+        const contentObject = new Content({ type: 'tree' });
+        if (index[0].type === 'tree') {
+          // Если первый объект это узел,
+          // то считаем его содержанием дальнейших заметок,
+          // и удаляем из списка
+          Object.assign(contentObject, index.shift());
+        } else {
+          // если нет, берём в качестве заголовка имя файла
+          contentObject.title = path.slice(-1)[0].replace(/\.md$/, '');
+        }
+        // Сохраняем содержание
+        contentObject.index = index.slice(0);
+        // Дата
+        contentObject.date = contentObject.index ? contentObject.index[0].date : data.date;
+        // Проставляем путь
+        contentObject.path = path.map(part => part.trim()).slice(0, -1);
+        // Проблема 2:
+        // Возможно этот файл является картой дерева директории
+        // Но при этом сам может обладать заметками... (быть узлом заметок)
+        // Найти-то его просто (соападает имя файла и директории)
+        if (contentObject.title === path.slice(-2)[0].trim()) {
+          // а что с ним деламть дальше?
+          // может вообще не сохраять промежуточные директории?
+        }
+        // Возвращаем
+        return contentObject;
+      });
     // Утверждаем у пользователя узел и его контент
-    .then(contentObject => dialog.confirmContentAndTitle(contentObject))
-    // // Сохраняем узел и её заметки в базу
-    // .then((contentObject) => {
-    //   const index = [contentObject].concat(contentObject.index);
-    //   index.forEach((item) => {
-    //     db.write({ id: item.id, text: md.stringify([item]) }, { home });
-    //   });
-    //   return contentObject;
-    // })
-    // // Перезаписываем исходный файл пользователя
-    // .then((contentObject) => {
-    //   const index = contentObject.index;
-    //   const text = md.stringify([contentObject].concat(index));
-    //   fs.outputFileAsync(filename, text);
-    //   return contentObject;
-    // })
+    if (!silent) {
+      pipe = pipe.then(contentObject => dialog.confirmContentAndTitle(contentObject));
+    }
+    // Перезаписываем исходный файл пользователя
+    if (!noreplace) {
+      pipe = pipe.then((contentObject) => {
+        // Наш узел должен быть единственным в полученном индексе
+        // Но мы должны записать не только его
+        // но и его детей раздельно
+        const flatContentList = [contentObject].concat(contentObject.index);
+        fs.outputFileAsync(filename, md.stringify(flatContentList));
+        return contentObject;
+      });
+    }
     // Добавляем узел в список для построения дерева
-    .then((contentObject) => {
+    pipe.then((contentObject) => {
       nodeList.push(contentObject);
       return true;
     })
     // Сигнализируем завершение и ошибки
     .then(() => nextFile())
     .catch((error) => {
-      if (error) {
-        console.log(chalk.red(error));
-      }
+      if (error) console.log(chalk.red(error));
       nextFile();
     });
   })
@@ -85,10 +92,11 @@ function readTree(pattern) {
       treeObject = new Content({ title, type: 'tree' });
     }
     // Заменяем ему детей
+    // А может надо вычислить разницу, забрать id?
     delete treeObject.index;
     treeObject.addChildren(nodeList);
     // Отдаём дерево
-    return treeObject;
+    return [treeObject];
   });
 }
 

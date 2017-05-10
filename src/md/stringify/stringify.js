@@ -1,75 +1,83 @@
 const os = require('os');
+const util = require('util')
 
-const lineDivider = os.EOL.repeat(2);
-const itemDivider = `${lineDivider}* * *${lineDivider}`;
+const paragraphDivider = os.EOL.repeat(2);
+const contentDivider = `${paragraphDivider}* * *${paragraphDivider}`;
 
-function stringify(contentObjectList, { depth = 1 } = {}) {
-  return contentObjectList.map((contentObject) => {
-    const clone = Object.assign({}, contentObject);
-    let lines = [];
+function stringify(contentObject, { nojson, expand, depth = 0 } = {}) {
+  if (Array.isArray(contentObject)) {
+    return contentObject
+    .map(item => stringify(item, { nojson, expand, depth }))
+    .join(contentDivider);
+  }
+  // console.log(util.inspect(contentObject, { depth: 10 }));
+  // Делаем json свойств и потом отрезаем ему лишнее
+  const json = Object.assign({}, contentObject);
+  // Надо вывести заметку в текст, но есть хитрость
+  // с деревьями - нужно подзаголовки лепить с id и комментами
+  // для вложенных узлов. А кроме того, конечные заметки
+  // не лепить вовсе, а только в виде ссылок на них.
+  // Собираем текст
+  const lines = [];
+  // Определить что мы вложены можно по depth > 0.
+  // Определить что мы последняя финальная заметка и не надо нас
+  // стрингифаить по полной программе можно по
+  // type !== 'tree' или !index.
+  // А, ну и если опция не просит развернуть таки
+  if (depth > 0 && !contentObject.index && contentObject.type !== 'tree' && !expand) {
+    // Сокращённая программа
+    const li = '*';
+    const t = `[${contentObject.title || contentObject.excerpt(40)}]`;
+    const id = `(${contentObject.id})`;
+    lines.push(`${li} ${t}${id}`);
+  } else {
+    // Полная программа:
+    // Если есть заголовок, лепим его
     if (contentObject.title) {
-      lines.push(`${'#'.repeat(depth)} ${contentObject.title}`);
-      delete clone.title;
+      const h = '#'.repeat(depth + 1);
+      // Но если внутри дерева, на бОльшей глубине, то
+      // заголовок делаем ссылкой с id
+      if (depth > 0) {
+        const t = `[${contentObject.title}]`;
+        const id = `(${contentObject.id})`;
+        lines.push(`${h} ${t}${id}`);
+        // И кстати json надо будет не лепить,
+        // но про это позже
+      } else {
+        // а нет, значит это корневой заголовок
+        // заметки, лепим как обычно
+        const t = contentObject.title;
+        lines.push(`${h} ${t}`);
+      }
     }
-    if (contentObject.text && depth === 1) {
-      lines.push(contentObject.text);
+    delete json.title;
+    // Собственный текст заметки.
+    if (contentObject.text) {
+      lines.push(contentObject.text.replace(/^(#{1,})(\s+)/gm, `$1${'#'.repeat(depth)}$2`));
     }
+    delete json.text;
+    // Теперь дети (рекурсивно).
     if (contentObject.index) {
       lines.push(contentObject.index
-        .map(item => `* [${item.title || item.excerpt}](${item.id})`)
-        .join(os.EOL));
-      delete clone.index;
+        .map(item => stringify([item], { nojson, expand, depth: depth + 1 }).concat(item.index ? os.EOL : ''))
+        .join(os.EOL)
+        .trim());
     }
-    if (contentObject.children) {
-      lines = lines.concat(contentObject.children
-        .map(item => stringify([item], { depth: depth + 1 })));
-      delete clone.children;
+    delete json.index;
+    // Отрезаем остальные излишки
+    delete json.path;
+    delete json.excerpt;
+    delete json.parent;
+    // Чтоб залепить прилагающийся json
+    // Но только в том случае если мы в корневом узле
+    // для остальных хватит и ссылок
+    // (а, ну и если опция не запрещает)
+    if (depth === 0 && !nojson) {
+      lines.push(`<!-- ${JSON.stringify(json)}-->`);
     }
-    delete clone.path;
-    delete clone.excerpt;
-    delete clone.parent;
-    delete clone.text;
-    if (depth === 1) {
-      lines.push(`<!-- ${JSON.stringify(clone)} -->`);
-    }
-    return lines.join(lineDivider);
-  }).join(itemDivider);
+  }
+  // Отдаём получившийся markdown-текст
+  return lines.join(paragraphDivider);
 }
-
-// function stringifyTree(treeObject, { clean = false } = {}) {
-//   const TreeNode = require('../../tree/tree').node;
-//   const tree = new TreeNode(treeObject);
-//   let text = tree.stringify({ clean });
-//   const properties = {
-//     id: tree.id,
-//     date: moment(tree.date),
-//     type: 'tree',
-//   };
-//   text += `${os.EOL}<!-- ${JSON.stringify(properties)} -->${os.EOL}`;
-//   return text;
-// }
-
-// function stringifyItem(contentObject, { clean = false } = {}) {
-//   let result;
-//   if (contentObject.type === 'tree') {
-//     result = stringifyTree(contentObject, { clean });
-//   } else {
-//     const title = print.title(contentObject);
-//     const content = print.safe(contentObject.content);
-//     const clone = Object.assign({}, contentObject);
-//     delete clone.content;
-//     delete clone.title;
-//     const properties = (JSON.stringify(clone) !== '{}' ? (`${lineDivider}<!-- ${JSON.stringify(clone)} -->`) : '');
-//     result = title + (content && title ? lineDivider : '') + content + (!clean ? properties : '');
-//   }
-//   return result;
-// }
-
-// function stringify(obj, options) {
-//   if (!Array.isArray(obj)) {
-//     return stringifyItem(obj, options);
-//   }
-//   return obj.map(item => stringifyItem(item, options)).join(itemDivider);
-// }
 
 module.exports = stringify;

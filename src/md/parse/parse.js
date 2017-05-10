@@ -1,20 +1,17 @@
 /* eslint array-callback-return: 0 */
 
 const es = require('event-stream');
-const moment = require('moment');
+// const moment = require('moment');
 // const chalk = require('chalk');
 // const util = require('util');
-const uuid = require('node-uuid');
+// const uuid = require('node-uuid');
 // const createMarkdownIndexEntry = require('./create-markdown-index-entry');
-const transformContentAndKeepContext = require('./transform-content-and-keep-context');
-const parseTree = require('./parse-tree');
 const Content = require('../../content/content');
-
-const db = require('../../db/db');
+const parseDate = require('./parse-date');
 const parseProperties = require('./parse-properties');
 const parseTitle = require('./parse-title');
-const parseExcerpt = require('./parse-excerpt');
-const parseDate = require('./parse-date');
+const parseIndex = require('./parse-index');
+const transformContentAndKeepContext = require('./transform-content-and-keep-context');
 
 const contentDelimiter = /\r?\n\*\s+\*\s+\*\s*\r?\n/;
 
@@ -46,12 +43,6 @@ function parse(string, contextObject = { date: new Date() }) {
         parseTitle(contentObject)));
     }))
 
-    // Достаём краткую выдержку
-    .pipe(es.map((contentObject, next) => {
-      next(null, Object.assign(contentObject,
-        parseExcerpt(contentObject, 45)));
-    }))
-
     // Достаём дату из заголовка
     // и обновляем ею наш контент-объект
     // а также контекст-объект
@@ -72,24 +63,22 @@ function parse(string, contextObject = { date: new Date() }) {
         parseProperties(contentObject)));
     }))
 
-    // Обрабатываем специфические команды в JSON
-    .pipe(es.map((contentObject, next) => {
-      if (contentObject.delete) {
-        // Удаляем из базы
-        db.remove({ id: contentObject.id });
-        // Пропускаем этот объект
-        next();
-      } else {
-        next(null, contentObject);
-      }
-    }))
+    // // Обрабатываем специфические команды в JSON
+    // .pipe(es.map((contentObject, next) => {
+    //   if (contentObject.delete) {
+    //     // Удаляем из базы
+    //     db.remove({ id: contentObject.id });
+    //     // Пропускаем этот объект
+    //     next();
+    //   } else {
+    //     next(null, contentObject);
+    //   }
+    // }))
 
-    // Парсим специфические контент-объекты
+    // Парсим детей, если есть
     .pipe(es.map((contentObject, next) => {
-      if (contentObject.type === 'tree') {
-        Object.assign(contentObject, parseTree(contentObject));
-      }
-      next(null, contentObject);
+      next(null, Object.assign(contentObject,
+        parseIndex(contentObject)));
     }))
 
     // Собираем коллекцию контент-объектов

@@ -14,18 +14,13 @@ function confirmContentList(index) {
         nextContent();
       })
       .catch((error) => {
-        if (error) {
-          console.log(chalk.red(error));
-        }
+        if (error) console.log(chalk.red(error));
         nextContent();
       });
     }, (error) => {
       // Когда всё пропарсили отдаём список
-      if (error) {
-        reject(error);
-      } else {
-        resolve(confirmedIndex);
-      }
+      if (error) reject(error);
+      else resolve(confirmedIndex);
     });
   });
 }

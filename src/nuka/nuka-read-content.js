@@ -1,19 +1,34 @@
+const chalk = require('chalk');
+const fs = require('fs-extra-promise');
 const dialog = require('../dialog/dialog');
 const md = require('../md/md');
 const readFiles = require('./nuka-read-files');
 
-function readContent(pattern) {
+function readContent(pattern, { noreplace, silent }) {
   // Список контент-объектов
   let contentList = [];
   // По каждому файлу из списка
   return readFiles(pattern, (filename, data, nextFile) => {
     // Парсим текст в контент-объекты
-    md.parse(data.text, { date: data.date })
+    let pipe = md.parse(data.text, { date: data.date });
     // Утверждаем у пользователя список контент-объектов
-    .then(index => dialog.confirmContentList(index))
+    if (!silent) {
+      pipe = pipe.then(index => dialog.confirmContentList(index));
+    }
+    // Перезаписываем исходные файлы
+    if (!noreplace) {
+      pipe = pipe.then((confirmedIndex) => {
+        fs.outputFileAsync(filename, md.stringify(confirmedIndex));
+        return confirmedIndex;
+      });
+    }
     // Сохраним список и переходим к следующему файлу
-    .then((confirmedIndex) => {
+    pipe.then((confirmedIndex) => {
       contentList = contentList.concat(confirmedIndex);
+      nextFile();
+    })
+    .catch((error) => {
+      if (error) console.log(chalk.red(error));
       nextFile();
     });
   })

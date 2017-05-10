@@ -1,6 +1,5 @@
 const fs = require('fs-extra-promise');
 
-// Load options
 function loadOptions(filename = 'mr.json') {
   const defaultOptions = {
     home: '.',
@@ -14,7 +13,8 @@ function loadOptions(filename = 'mr.json') {
       options = fs.readFileSync(`${path.join('/')}/${filename}`, 'utf-8');
       pathFound = path.join('/');
     } catch (error) {
-      // not found
+      // Не найден, идем в след. цикл,
+      // с родительской директорией
       path.pop();
     }
     if (options) {

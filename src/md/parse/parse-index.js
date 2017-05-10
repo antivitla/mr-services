@@ -1,5 +1,5 @@
 const os = require('os');
-const util = require('util');
+// const util = require('util');
 const Content = require('../../content/content');
 
 function parseIndex(contentObject) {
@@ -25,6 +25,7 @@ function parseIndex(contentObject) {
       currentContentNode.index.push(new Content({
         id: isIndex[2],
         title: isIndex[1],
+        text: '',
       }));
     } else if (isNode) {
       // Добавляем дочерний узел
@@ -32,17 +33,21 @@ function parseIndex(contentObject) {
       const title = isNode[2];
       const depth = isNode[1].trim().length;
       // Сохраняем предыдущий узел
-      if (currentContentNode) {
-        // Лишние отбивки убираем
-        currentContentNode.text = currentContentNode.text.replace(/(\r?\n){3,}/, os.EOL.repeat(2));
-        // Кладём в список
-        flatNodeList.push(currentContentNode);
-      }
+      // Лишние отбивки убираем
+      currentContentNode.text = currentContentNode.text.replace(/(\r?\n){3,}/, os.EOL.repeat(2));
+      // Кладём в список
+      flatNodeList.push(currentContentNode);
       // Создаём новый узел, путь добавим чуть позднее
-      currentContentNode = new Content({ id, title, type: 'tree', path: [] });
+      currentContentNode = new Content({
+        id,
+        title,
+        type: 'tree',
+        path: [],
+        text: '',
+      });
       // Заморочка с путём данного объекта
       // берём данные из предыдущего объекта
-      const lastNode = flatNodeList.slice(-1);
+      const lastNode = flatNodeList.slice(-1)[0];
       const lastPath = lastNode && lastNode.path ? lastNode.path.slice(0) : [];
       // Если глубина вложенности больше предыдущего
       if (depth > lastPath.length + 2) {
@@ -52,11 +57,11 @@ function parseIndex(contentObject) {
         // Если меньше, удаляем лишнее из пути
         while (depth < lastPath.length + 2) lastPath.pop();
         // И запоминаем его
-        currentContentNode.path = lastPath.splice(0);
+        currentContentNode.path = lastPath.slice(0);
       }
     } else {
       // Добавляем как текст
-      currentContentNode.text += currentContentNode.text ? os.EOL + line : line;
+      currentContentNode.text += currentContentNode.text ? (os.EOL + line) : line;
     }
   });
   // Добавляем последний узел

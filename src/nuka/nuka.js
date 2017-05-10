@@ -27,9 +27,9 @@ function pipeSave({ skip, home } = {}) {
   };
 }
 
-function pipeStdout({ skip, nojson, expand } = {}) {
+function pipeStdout({ skip, nojson, expand, format } = {}) {
   return function (index) {
-    if (!skip) stdout(index, { nojson, expand });
+    if (!skip) stdout(index, { nojson, expand, format });
     return index;
   };
 }

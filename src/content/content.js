@@ -9,7 +9,7 @@ function Content(model) {
 }
 
 Content.prototype.addChild = function (contentObject, depth = 0) {
-  // Для постройки дерева используется title и path,
+  // Для постройки дерева используется title и path
   // Создаём контейнер детей
   this.index = this.index || [];
   // Пытаемся вставить в уже существующего ребёнка
@@ -20,12 +20,12 @@ Content.prototype.addChild = function (contentObject, depth = 0) {
   } else if (contentObject.path.length > depth) {
     // В противном случае добавляем ребёнка
     // Если он должен залегать глубже чем на один уровень
-    // поступаем хитро
-    // мы должны создать промежуточный узел
+    // поступаем хитро мы должны создать промежуточный узел
     // Есть проблема - при повторном апдейте дерева
     // этот прокси-узел заново создаётся, плодя дубликаты
     // Его или надо не создавать, или билдить потом во
-    // всех папках содержание
+    // всех папках содержание а потом перезаписываться им
+    // (перезапись в след. условии)
     const proxyChild = new Content({
       type: 'tree',
       title: contentObject.path[depth],
@@ -37,8 +37,16 @@ Content.prototype.addChild = function (contentObject, depth = 0) {
     // И сохранить себе
     this.index.push(proxyChild);
   } else {
-    // А если нет (один уровень), просто добавляем себе ребёнка
-    this.index.push(Object.assign(contentObject, { parent: this }));
+    // Можно вставлять, но вдруг у нас уже есть подобный ребёнок?
+    // Это отличается от проверки по пути как в начале функции
+    const equalChild = this.index.find(item => item.equal(contentObject));
+    if (equalChild) {
+      // Заменяем им то что есть
+      Object.assign(equalChild, contentObject, { parent: this });
+    } else {
+      // А если все эти сложности не про нас, просто добавляем себе ребёнка
+      this.index.push(Object.assign(contentObject, { parent: this }));
+    }
   }
   // Если мы реально дерево, принудительно подтверждаем что это так
   if (this.index.length) this.type = 'tree';
@@ -60,6 +68,12 @@ Content.prototype.flatten = function () {
   return list;
 };
 
+Content.prototype.equal = function (contentObject, depth) {
+  const equalTitle = this.title === contentObject.title;
+  const equalPath = JSON.stringify(this.path) === JSON.stringify(contentObject.path);
+  return equalPath && equalTitle;
+};
+
 Content.prototype.excerpt = function (length = 40) {
   let excerpt = '';
   if (this.text) {
@@ -75,6 +89,15 @@ Content.prototype.excerpt = function (length = 40) {
     excerpt = 'Пустой узел?';
   }
   return excerpt;
+};
+
+Content.prototype.deleteParent = function () {
+  const clone = new Content(this);
+  delete clone.parent;
+  if (clone.index) {
+    clone.index = clone.index.map(item => item.deleteParent());
+  }
+  return clone;
 };
 
 module.exports = Content;

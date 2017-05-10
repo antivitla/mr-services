@@ -242,8 +242,9 @@ program
 .option('-x, --expand', 'Экспорт деревьев и узлов красиво')
 .option('-o, --stdout', 'Вывод результата на экран или в файл (с помощью символа перенаправления вывода ОС)')
 .option('-b, --build', 'Строим дерево файлов по карте')
+.option('-f, --format [format]', 'Формат вывода пользователю')
 .option('-d, --stdin', 'Передаём управление стандартным потокам')
-.action(({ tree, node, content, editor, nosave, noreplace, nojson, silent, expand, stdout } = {}) => {
+.action(({ tree, node, content, editor, nosave, noreplace, nojson, silent, expand, stdout, format } = {}) => {
   // Готовим словарь ошибок
   function errorVocabulary(pattern) {
     return [{
@@ -255,7 +256,7 @@ program
   if (editor) {
     nuka.readEditor(editor !== true ? editor : '', { silent })
       .then(nuka.pipeSave({ skip: nosave, home: '.' }))
-      .then(nuka.pipeStdout({ skip: !stdout, nojson, expand }))
+      .then(nuka.pipeStdout({ skip: !stdout, nojson, expand, format }))
       .catch(nuka.pipeError());
   }
   // Сохраняем заметки из файлов
@@ -265,7 +266,7 @@ program
     // и перезаписывая исходные файлы
     nuka.readContent(content, { noreplace, silent: silent || stdout })
       .then(nuka.pipeSave({ skip: nosave, home: '.' }))
-      .then(nuka.pipeStdout({ skip: !stdout, nojson, expand }))
+      .then(nuka.pipeStdout({ skip: !stdout, nojson, expand, format }))
       .catch((error) => {
         if (error === '404') {
           // Если файлов с таким названием не найдено
@@ -274,7 +275,7 @@ program
           // и сохраняем этот текст как новую заметку
           dialog.confirmContentList([new Content({ text: content })])
             .then(nuka.pipeSave({ skip: nosave, home: '.' }))
-            .then(nuka.pipeStdout({ skip: !stdout, nojson, expand }))
+            .then(nuka.pipeStdout({ skip: !stdout, nojson, expand, format }))
             .catch(nuka.pipeError());
         } else {
           nuka.pipeError()(error);
@@ -288,7 +289,7 @@ program
     // и перезаписывая исходные файлы
     nuka.readNode(node, { noreplace, silent: silent || stdout })
       .then(nuka.pipeSave({ skip: nosave, home: '.' }))
-      .then(nuka.pipeStdout({ skip: !stdout, nojson, expand }))
+      .then(nuka.pipeStdout({ skip: !stdout, nojson, expand, format }))
       // Ловим ошибки
       .catch(nuka.pipeError(errorVocabulary(nuka.safePattern(node))));
   }
@@ -301,7 +302,7 @@ program
       // Сохраняем если надо
       .then(nuka.pipeSave({ skip: nosave, home: '.' }))
       // Выводим пользователю что получилось, если надо
-      .then(nuka.pipeStdout({ skip: !stdout, nojson, expand }))
+      .then(nuka.pipeStdout({ skip: !stdout, nojson, expand, format }))
       // Ловим ошибки
       .catch(nuka.pipeError(errorVocabulary(nuka.safePattern(node))));
   }

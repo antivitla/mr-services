@@ -5,6 +5,17 @@ const dialog = require('../dialog/dialog');
 const md = require('../md/md');
 const readFiles = require('./nuka-read-files');
 
+function defaultTreeTitle() {
+  return process.cwd().split(/\\|\//).pop();
+}
+
+function isRootTreeNode(contentObject) {
+  const isTreeFile = contentObject.title === defaultTreeTitle();
+  const isTreeType = contentObject.type === 'tree';
+  const isRoot = !contentObject.path || !contentObject.path.length;
+  return isTreeFile && isTreeType && isRoot;
+}
+
 function readNode(pattern, { noreplace, silent }) {
   // Собираем список узлов
   const nodeList = [];
@@ -24,10 +35,12 @@ function readNode(pattern, { noreplace, silent }) {
           // если нет, берём в качестве заголовка имя файла
           contentObject.title = filename.split('/').slice(-1)[0].replace(/\.md$/, '');
         }
-        // Сохраняем содержание
-        contentObject.index = index.slice(0);
+        // Перезаписываем содержание узла теми заметками что реально есть в файле
+        // Но если это единственная заметка, скорей всего это
+        // файл дерева и не надо заменять ему детей
+        if (index.length) contentObject.index = index.slice(0);
         // Дата
-        contentObject.date = contentObject.index ? contentObject.index[0].date : data.date;
+        contentObject.date = contentObject.index && contentObject.index.length ? contentObject.index[0].date : data.date;
         // Возвращаем узел
         return contentObject;
       });
@@ -41,8 +54,10 @@ function readNode(pattern, { noreplace, silent }) {
         // Наш узел должен быть единственным в полученном индексе
         // Но мы должны записать не только его
         // но и его детей раздельно
-        const flatContentList = [contentObject].concat(contentObject.index);
-        fs.outputFileAsync(filename, md.stringify(flatContentList));
+        // Но только если он не узел-дерево
+        let list = [contentObject];
+        if (!isRootTreeNode(contentObject)) list = list.concat(contentObject.index);
+        fs.outputFileAsync(filename, md.stringify(list));
         return contentObject;
       });
     }

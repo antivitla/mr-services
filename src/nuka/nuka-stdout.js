@@ -6,7 +6,8 @@ function stdout(index, { format = 'md', nojson, expand } = {}) {
       return md.stringify(index, { nojson, expand });
     },
     json() {
-      return JSON.stringify(index);
+      const noCircular = index.map(item => item.deleteParent());
+      return JSON.stringify(noCircular, null, 2);
     },
   };
   process.stdout.write(stringify[format]());

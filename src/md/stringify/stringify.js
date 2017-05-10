@@ -1,5 +1,5 @@
 const os = require('os');
-const util = require('util')
+// const util = require('util');
 
 const paragraphDivider = os.EOL.repeat(2);
 const contentDivider = `${paragraphDivider}* * *${paragraphDivider}`;
@@ -10,7 +10,6 @@ function stringify(contentObject, { nojson, expand, depth = 0 } = {}) {
     .map(item => stringify(item, { nojson, expand, depth }))
     .join(contentDivider);
   }
-  // console.log(util.inspect(contentObject, { depth: 10 }));
   // Делаем json свойств и потом отрезаем ему лишнее
   const json = Object.assign({}, contentObject);
   // Надо вывести заметку в текст, но есть хитрость

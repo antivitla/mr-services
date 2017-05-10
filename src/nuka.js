@@ -11,12 +11,6 @@ const os = require('os');
 // const marked = require('marked');
 // const TerminalRenderer = require('marked-terminal');
 
-// const read = require('./read/read');
-// const options = require('./options/options');
-// const refs = require('./refs/refs');
-// const get = require('./get/get');
-// const TreeNode = require('./tree/tree').node;
-
 const Content = require('./content/content');
 const dialog = require('./dialog/dialog');
 const nuka = require('./nuka/nuka');
@@ -66,73 +60,6 @@ program
   .version('0.0.1')
   .usage('<command> [options]');
 
-// // Get
-// program
-//   .command('get <what>')
-//   .option('-c, --clean', 'Clean texts without JSON properties')
-//   .option('-a, --all', 'Get everything, unordered')
-//   .option('-q, --query [str]', 'Search everything by query string')
-//   .option('-i, --id [id]', 'Get by id')
-//   .option('-r, --ref [title]', 'Set reference title')
-//   .action((what, { clean = false, all = false, query, id, ref } = {}) => {
-//     if (!what) {
-//       console.log(chalk.grey(`${os.EOL}А что именно get?${os.EOL}`));
-//     } else if (what === 'content') {
-//       if (id) {
-//         // Ищем по айди
-//         get({ home: NukaOptions.home, id }).then((index) => {
-//           process.stdout.write(md.stringify(index, { clean }));
-//         });
-//       } else if (ref && ref !== true) {
-//         // Ищем по ссылке
-//         refs.list(NukaOptions.home).then((list) => {
-//           const foundRef = list.find(item => item.title === ref);
-//           if (foundRef) {
-//             get({ home: NukaOptions.home, id: foundRef.id })
-//               .then((index) => {
-//                 process.stdout.write(md.stringify(index, { clean }));
-//               });
-//           } else {
-//             console.log(chalk.grey(`${os.EOL}Не найдена ссылка ${ref} в ${NukaOptions.home}${os.EOL}`));
-//           }
-//         });
-//       } else {
-//         get({ home: NukaOptions.home }).then((contentIndex) => {
-//           if (contentIndex.length) {
-//             let filteredContentIndex = [];
-//             if (all) {
-//               // Все заметки
-//               filteredContentIndex = contentIndex;
-//             } else if (query) {
-//               // Поиск заметки по строке
-//               const queries = query.toLowerCase().split(',').map(q => q.trim());
-//               filteredContentIndex = contentIndex.filter(item => queries.find((q) => {
-//                 const titleFound = item.title ? item.title.toLowerCase().match(q) : false;
-//                 const contentFound = item.content ? item.content.toLowerCase().match(q) : false;
-//                 return titleFound || contentFound;
-//               }));
-//             } else {
-//               console.log(chalk.grey(`${os.EOL}Не заданы параметры поиска в ${NukaOptions.home}${os.EOL}`));
-//             }
-//             // Вывод заметок
-//             if (filteredContentIndex.length) {
-//               filteredContentIndex.sort((a, b) => moment(a.date) - moment(b.date));
-//               process.stdout.write(md.stringify(filteredContentIndex, { clean }));
-//             }
-//           } else {
-//             console.log(chalk.grey(`${os.EOL}Пустая база данных в ${NukaOptions.home}${os.EOL}`));
-//           }
-//         });
-//       }
-//     } else if (what === 'refs') {
-//       refs.list(NukaOptions.home).then((list) => {
-//         const result = list
-//           .map(refItem => chalk.yellow(`${refItem.title}: `) + chalk.gray(refItem.id))
-//           .join(os.EOL);
-//         console.log(os.EOL + result + os.EOL);
-//       });
-//     }
-//   });
 
 // // Index
 // program

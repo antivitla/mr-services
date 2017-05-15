@@ -7,13 +7,12 @@ const es = require('event-stream');
 // const uuid = require('node-uuid');
 // const createMarkdownIndexEntry = require('./create-markdown-index-entry');
 const Content = require('../../content/content');
+const options = require('../../options/options');
 const parseDate = require('./parse-date');
 const parseProperties = require('./parse-properties');
 const parseTitle = require('./parse-title');
 const parseIndex = require('./parse-index');
 const transformContentAndKeepContext = require('./transform-content-and-keep-context');
-
-const contentDelimiter = /\r?\n\*\s+\*\s+\*\s*\r?\n/;
 
 function parse(string, contextObject = { date: new Date() }) {
   return new Promise((resolve, reject) => {
@@ -24,7 +23,7 @@ function parse(string, contextObject = { date: new Date() }) {
     es.readArray([string])
 
     // Делим на заметки
-    .pipe(es.split(contentDelimiter))
+    .pipe(es.split(options.contentDividerRegexp))
     // Удаляем лишние пробелы
     .pipe(es.map((contentText, next) => {
       const text = contentText.trim().replace(/^\s*|\s*$/g, '');

@@ -1,9 +1,18 @@
+const chalk = require('chalk');
+const os = require('os');
 const fs = require('fs-extra-promise');
 
 function loadOptions(filename = 'mr.json') {
   const defaultOptions = {
     home: '.',
     context: {},
+    contentDivider: `${os.EOL.repeat(2)}* * *${os.EOL.repeat(2)}`,
+    contentDividerRegexp: /\r?\n\*\s+\*\s+\*\s*\r?\n/,
+    ext: '.md',
+    extRegexp: /\.md$/,
+    path: {
+      archive: './.archive',
+    },
   };
   let options;
   let pathFound;
@@ -18,7 +27,15 @@ function loadOptions(filename = 'mr.json') {
       path.pop();
     }
     if (options) {
-      const optionsObject = JSON.parse(options);
+      let optionsObject;
+      try {
+        optionsObject = JSON.parse(options);
+      } catch (error) {
+        console.log(chalk.red(`Ошибка в ${filename}, ${error}`));
+      }
+      // Смешиваем пользовательские и дефолтные настройки
+      optionsObject = Object.assign({}, defaultOptions, optionsObject);
+      // Проставляем полный путь к базе, на всякий
       optionsObject.home = optionsObject.home === '.' ? pathFound : optionsObject.home;
       return optionsObject;
     }
@@ -26,4 +43,4 @@ function loadOptions(filename = 'mr.json') {
   return defaultOptions;
 }
 
-module.exports = loadOptions;
+module.exports = loadOptions('mr.json');

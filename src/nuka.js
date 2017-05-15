@@ -4,8 +4,10 @@ const program = require('commander');
 const chalk = require('chalk');
 const moment = require('moment');
 const os = require('os');
-// const fs = require('fs-extra-promise');
-// const glob = require('globby');
+const glob = require('globby');
+const fs = require('fs-extra-promise');
+const fsold = require('fs');
+const deleteEmpty = require('delete-empty');
 // const prompt = require('prompt-promise');
 // const util = require('util');
 // const marked = require('marked');
@@ -14,7 +16,7 @@ const os = require('os');
 const Content = require('./content/content');
 const dialog = require('./dialog/dialog');
 const nuka = require('./nuka/nuka');
-const options = require('./options/options')('mr.json');
+const options = require('./options/options');
 
 // Init
 moment.locale('ru');
@@ -89,25 +91,35 @@ program
 //     });
 //   });
 
-// // Archive
-// program
-//   .command('archive')
-//   .option('-s, --session', 'Arhive to session dated today')
-//   .option('-f, --file [pattern]')
-//   .action(({ session = false, file }) => {
-//     let path = '.archive';
-//     const pattern = (file && file !== true) ? file : '**/*.*';
-//     if (session) {
-//       const date = moment().format('YYYY-MM-DD');
-//       path += `/Session ${date}/`;
-//     }
-//     glob([pattern, '!**/node_modules/**', '!**/bower_components/**'])
-//       .then((filelist) => {
-//         filelist.forEach((fileitem) => {
-//           fs.move(fileitem, path + fileitem, { overwrite: true });
-//         });
-//       });
-//   });
+// Archive
+program
+  .command('archive')
+  .option('-s, --session', 'Arhive to session dated today')
+  .option('-f, --file [file]')
+  .action(({ session = true, file = './**/*.*' }) => {
+    let path = options.path.archive;
+    function clean() {
+      deleteEmpty('.', (error, deleted) => {
+        if (error) console.log(chalk.red(error));
+      });        
+    }
+    if (session) {
+      const date = moment().format('YYYY-MM-DD');
+      path += `/Session ${date}/`;
+    }
+    glob([file, '!**/node_modules/**', '!**/bower_components/**'])
+      .then((filelist) => {
+        let count = filelist.length;
+        filelist.forEach((fileitem) => {
+          fs.move(fileitem, path + fileitem, { overwrite: true }, () => {
+            count -= 1;
+            if (count === 0) {
+              clean();
+            }
+          });
+        });
+      });
+  });
 
 // // Delete
 // program
@@ -171,7 +183,8 @@ program
 .option('-b, --build', 'Строим дерево файлов по карте')
 .option('-f, --format [format]', 'Формат вывода пользователю')
 .option('-d, --stdin', 'Передаём управление стандартным потокам')
-.action(({ tree, node, content, editor, nosave, noreplace, nojson, silent, expand, stdout, format } = {}) => {
+.option('-k, --keepPath', 'Сохранять путь')
+.action(({ tree, node, content, editor, nosave, noreplace, nojson, silent, expand, stdout, format, keepPath } = {}) => {
   // Готовим словарь ошибок
   function errorVocabulary(pattern) {
     return [{
@@ -214,7 +227,7 @@ program
     // Считаываем узлы-файлы с заметками,
     // опционально опуская подтверждения
     // и перезаписывая исходные файлы
-    nuka.readNode(node, { noreplace, silent: silent || stdout })
+    nuka.readNode(node, { noreplace, silent: silent || stdout, keepPath })
       .then(nuka.pipeSave({ skip: nosave, home: '.' }))
       .then(nuka.pipeStdout({ skip: !stdout, nojson, expand, format }))
       // Ловим ошибки

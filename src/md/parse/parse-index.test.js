@@ -2,7 +2,7 @@
 /* eslint prefer-arrow-callback: 0, func-names: 0 */
 
 const assert = require('assert');
-const parseTree = require('./parse-tree');
+const parseTree = require('./parse-index');
 // const os = require('os');
 // const util = require('util');
 

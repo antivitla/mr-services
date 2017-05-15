@@ -3,6 +3,7 @@ const fs = require('fs-extra-promise');
 const async = require('async');
 const chalk = require('chalk');
 const safePattern = require('./nuka-safe-pattern');
+const options = require('../options/options');
 const fileDate = require('./nuka-file-date');
 
 const excludePatterns = [
@@ -16,8 +17,8 @@ function defaultTreeTitle() {
 
 function isTreeFile(filename) {
   const path = filename.split('/');
-  const isTreeNode = path.slice(-1)[0].replace(/\.md$/, '') === path.slice(-2)[0];
-  const isRootNode = defaultTreeTitle() === path[0].replace(/\.md$/,'');
+  const isTreeNode = path.slice(-1)[0].replace(options.extRegexp, '') === path.slice(-2)[0];
+  const isRootNode = defaultTreeTitle() === path[0].replace(options.extRegexp,'');
   return isTreeNode || isRootNode;
 }
 

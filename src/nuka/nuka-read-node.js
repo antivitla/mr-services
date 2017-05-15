@@ -3,45 +3,74 @@ const Content = require('../content/content');
 const fs = require('fs-extra-promise');
 const dialog = require('../dialog/dialog');
 const md = require('../md/md');
+const options = require('../options/options');
 const readFiles = require('./nuka-read-files');
 
-function defaultTreeTitle() {
-  return process.cwd().split(/\\|\//).pop();
-}
-
-function isRootTreeNode(contentObject) {
-  const isTreeFile = contentObject.title === defaultTreeTitle();
-  const isTreeType = contentObject.type === 'tree';
-  const isRoot = !contentObject.path || !contentObject.path.length;
-  return isTreeFile && isTreeType && isRoot;
-}
-
-function readNode(pattern, { noreplace, silent }) {
-  // Собираем список узлов
+function readNode(pattern, { noreplace, silent, keepPath } = {}) {
+  // Список узлов
   const nodeList = [];
-  // Проходим по каждому файлу из списка
+  // По каждому файлу из списка по маске
   return readFiles(pattern, (filename, data, nextFile) => {
-    // Парсим текст в контент-объекты
-    let pipe = md.parse(data.text, { date: data.date })
+    // Трубопровод промисов
+    let pipe;
+    // Парсим текст файла в контент-объекты
+    pipe = md.parse(data.text, { date: data.date })
       .then((index) => {
-        // Конструируем контент-узел
-        const contentObject = new Content({ type: 'tree' });
+        // Сохраняем путь файла, пригодится
+        const path = filename.split('/');
+        // Либо в файле уже определён узел (ранее),
+        // либо это новый узел заметок, для которого
+        // его (контент-узел) ещё надо создать.
+        // В любом случае конструируем узел сначала
+        const contentObject = new Content({ type: 'tree', index: [] });
+        // Теперь проверяем есть ли уже в файле описание узла,
+        // он (узел-заметка) должен идти первым в списке.
         if (index[0].type === 'tree') {
-          // Если первый объект это узел,
-          // то считаем его содержанием дальнейших заметок,
-          // и удаляем из списка
+          // И перезаписываем наш свежесозданный узел
+          // его свойствами, плюс удаляем из индекс-списка
+          // этот контент-объект (мы в итоге один объект
+          // должны возвратить)
           Object.assign(contentObject, index.shift());
+          // Из пути выкидываем последний элемент (имя файла)
+          // оно нам не нужно больше
+          path.pop();
         } else {
-          // если нет, берём в качестве заголовка имя файла
-          contentObject.title = filename.split('/').slice(-1)[0].replace(/\.md$/, '');
+          // Значит новый узел, берём имя файла в качестве его имени
+          // и удаляем из пути это имя
+          contentObject.title = path.pop().replace(options.extRegexp, '');
+          // Дата узла это дата создания самого файла заметок.
+          contentObject.date = data.date;
         }
-        // Перезаписываем содержание узла теми заметками что реально есть в файле
-        // Но если это единственная заметка, скорей всего это
-        // файл дерева и не надо заменять ему детей
-        if (index.length) contentObject.index = index.slice(0);
-        // Дата
-        contentObject.date = contentObject.index && contentObject.index.length ? contentObject.index[0].date : data.date;
-        // Возвращаем узел
+        // Дальше надо решить проставлять ли нам путь к данному узлу.
+        // Вдруг этот вызов будет использоваться позже для
+        // создания дерева
+        if (keepPath) contentObject.path = path;
+        // Если найдены ещё заметки, добавляем их к узлу
+        if (index.length > 0) {
+          const leafContent = [];
+          index.forEach((indexContentObject) => {
+            // Есть ли уже такой объект в исходном узле?
+            const found = contentObject.index.find(item => item.id === indexContentObject.id);
+            if (found) {
+              // Перезаписываем его новыми свойствами
+              Object.assign(found, indexContentObject);
+            } else if (indexContentObject.type !== 'tree') {
+              // Если это простая заметка (не узел и не дерево) сохраняем пока
+              leafContent.push(indexContentObject);
+            } else {
+              // Добавляем в конец, раз это узел
+              contentObject.index.push(indexContentObject);
+            }
+          });
+          // TODO: Здесь надо diff делать
+          // Добавить их в начало а потом просортировать
+          if (leafContent.length) {
+            contentObject.index = leafContent.concat(contentObject.index);
+          }
+          // Сортируем на всякий случай leaf-заметки по дате
+          contentObject.sortLeafByDate();
+        }
+        // Узел готов
         return contentObject;
       });
     // Утверждаем у пользователя узел
@@ -51,13 +80,10 @@ function readNode(pattern, { noreplace, silent }) {
     // Перезаписываем исходный файл пользователя
     if (!noreplace) {
       pipe = pipe.then((contentObject) => {
-        // Наш узел должен быть единственным в полученном индексе
         // Но мы должны записать не только его
-        // но и его детей раздельно
-        // Но только если он не узел-дерево
-        let list = [contentObject];
-        if (!isRootTreeNode(contentObject)) list = list.concat(contentObject.index);
-        fs.outputFileAsync(filename, md.stringify(list));
+        // но и его leaf-контент раздельно
+        const index = [contentObject].concat(contentObject.getLeafChildren());
+        fs.outputFileAsync(filename, md.stringify(index));
         return contentObject;
       });
     }

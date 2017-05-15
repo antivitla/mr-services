@@ -1,6 +1,6 @@
 const fs = require('fs-extra-promise');
 const uuid = require('node-uuid');
-const options = require('../options/options')('mr.json');
+const options = require('../options/options');
 
 function url({ id } = {}, { home = options.home } = {}) {
   return `${home}/.mr/content/${id.slice(0, 2)}/${id.slice(2)}.md`;

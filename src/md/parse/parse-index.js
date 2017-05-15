@@ -19,18 +19,21 @@ function parseIndex(contentObject) {
   lines.forEach((line) => {
     const isIndex = line.match(/^\*\s+\[(.*)\]\((.*)\)/);
     const isNode = line.match(/^(#+)\s+\[(.*)\]\((.*)\)/);
+    const excerptRegexp = /^\.\.\./;
     if (isIndex) {
       // Добавляем leaf-контент-объект к текущему узлу
+      const title = isIndex[1].match(excerptRegexp) ? '' : isIndex[1];
+      const id = isIndex[2];
       currentContentNode.index = currentContentNode.index || [];
       currentContentNode.index.push(new Content({
-        id: isIndex[2],
-        title: isIndex[1],
-        text: '',
+        id,
+        title,
+        text: !title && isIndex[1].match(excerptRegexp) ? isIndex[1].replace('...', '') : '',
       }));
     } else if (isNode) {
       // Добавляем дочерний узел
       const id = isNode[3];
-      const title = isNode[2];
+      const title = isNode[2].match(excerptRegexp) ? '' : isNode[2];
       const depth = isNode[1].trim().length;
       // Сохраняем предыдущий узел
       // Лишние отбивки убираем
@@ -43,7 +46,7 @@ function parseIndex(contentObject) {
         title,
         type: 'tree',
         path: [],
-        text: '',
+        text: !title && isNode[2].match(excerptRegexp) ? isNode[2].replace('...', '') : '',
       });
       // Заморочка с путём данного объекта
       // берём данные из предыдущего объекта
@@ -70,11 +73,11 @@ function parseIndex(contentObject) {
   // Кладём в список
   flatNodeList.push(currentContentNode);
   // Далее интересно, если наш список из одного элемента,
-  // значит это просто узел и собирать его не надо
+  // значит это узел одного уровня и собирать его не надо
   // (нет детей-узлов, только максимум дети-контент)
   // Все остальные кроме первого узла - его дети, на разном уровне
   const treeNode = flatNodeList.shift();
-  treeNode.addChildren(flatNodeList);
+  if (flatNodeList.length) treeNode.addChildren(flatNodeList);
   // Миг победы
   return treeNode;
 }

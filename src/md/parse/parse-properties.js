@@ -7,6 +7,10 @@ function parseProperties(contentObject) {
   if (match) {
     try {
       const properties = JSON.parse(match[0].replace(/<!--|-->/g, '').trim());
+      // дату только создадим
+      properties.date = new Date(properties.date);
+      // и удалим старый excerpt
+      delete properties.excerpt;
       Object.assign(contentObject, properties);
       // Вынуть свойства из текста
       Object.assign(contentObject, {

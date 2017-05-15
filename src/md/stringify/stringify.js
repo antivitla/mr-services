@@ -1,14 +1,13 @@
 const os = require('os');
+const options = require('../../options/options');
 // const util = require('util');
 
-const paragraphDivider = os.EOL.repeat(2);
-const contentDivider = `${paragraphDivider}* * *${paragraphDivider}`;
 
 function stringify(contentObject, { nojson, expand, depth = 0 } = {}) {
   if (Array.isArray(contentObject)) {
     return contentObject
     .map(item => stringify(item, { nojson, expand, depth }))
-    .join(contentDivider);
+    .join(options.contentDivider);
   }
   // Делаем json свойств и потом отрезаем ему лишнее
   const json = Object.assign({}, contentObject);
@@ -57,10 +56,15 @@ function stringify(contentObject, { nojson, expand, depth = 0 } = {}) {
     delete json.text;
     // Теперь дети (рекурсивно).
     if (contentObject.index) {
-      lines.push(contentObject.index
-        .map(item => stringify([item], { nojson, expand, depth: depth + 1 }).concat(item.index ? os.EOL : ''))
-        .join(os.EOL)
-        .trim());
+      const childrenLines = contentObject.index
+        .map(item => stringify([item], { nojson, expand, depth: depth + 1 })
+          .concat(item.index ? os.EOL : ''));
+      // Теперь надо отбивочку между leaf-заметками и узловыми
+      const border = contentObject.index.findIndex(item => item.type === 'tree');
+      if (border > 0) {
+        childrenLines.splice(border, 0, '');
+      }
+      lines.push(childrenLines.join(os.EOL).trim());
     }
     delete json.index;
     // Отрезаем остальные излишки
@@ -76,7 +80,7 @@ function stringify(contentObject, { nojson, expand, depth = 0 } = {}) {
     }
   }
   // Отдаём получившийся markdown-текст
-  return lines.join(paragraphDivider);
+  return lines.join(os.EOL.repeat(2));
 }
 
 module.exports = stringify;

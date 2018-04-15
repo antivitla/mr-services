@@ -1,10 +1,10 @@
 {
-  "name": "mr-services",
+  "name": "minota",
   "version": "1.0.0",
-  "description": "Productivity services",
-  "main": "nuka.js",
+  "description": "Mind Notes Tracker",
+  "main": "minota.js",
   "bin": {
-    "nuka": "./nuka.js"
+    "minota": "./minota.js"
   },
   "scripts": {
     "test": "mocha **/*.test.js"
@@ -13,25 +13,9 @@
   "repository": "antivitla/mr-services",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.3.0",
-    "chalk": "^1.1.3",
-    "commander": "^2.9.0",
-    "event-stream": "^3.3.4",
-    "fs-extra-promise": "^0.4.1",
-    "globby": "^6.1.0",
-    "iconv-lite": "^0.4.15",
-    "jschardet": "^1.4.1",
-    "marked": "^0.3.6",
-    "marked-terminal": "^2.0.0",
-    "moment": "^2.17.1",
-    "node-uuid": "^1.4.7",
-    "prompt": "^1.0.0",
-    "prompt-promise": "^1.0.3",
-    "tempfile": "^1.1.1"
-  },
-  "devDependencies": {
-    "eslint": "^3.13.1",
-    "eslint-config-airbnb-base": "^11.0.1",
-    "eslint-plugin-import": "^2.2.0"
+    "async": "^2.6.0",
+    "axios": "^0.18.0",
+    "commander": "^2.15.1",
+    "promise-ftp": "^1.3.5"
   }
 }

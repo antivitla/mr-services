@@ -1,6 +1,6 @@
 'use strict';
 
-const check = require('./check');
+const check = require('../check');
 
 const template = {
   type: 'type'

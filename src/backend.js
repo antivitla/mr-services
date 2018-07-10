@@ -2,9 +2,9 @@
 
 const Where = require('./where');
 const What = require('./what');
-const scheme = require('./backend.scheme');
-const mockBackend = require('./backend.mock');
-const ftpBackend = require('./backend.ftp');
+const scheme = require('./backend/backend.scheme');
+const mockBackend = require('./backend/backend.mock');
+const ftpBackend = require('./backend/backend.ftp');
 
 const supportedBackendTypes = {
   mock: mockBackend,
@@ -22,7 +22,6 @@ class Backend extends Where {
     super(options);
     scheme.check(options);
     checkTypeSupport(options.type);
-    // this.type = options.type;
     this.driver = new supportedBackendTypes[options.type](options[options.type]);
   }
 
@@ -39,6 +38,10 @@ class Backend extends Where {
     });
     // do pushing with current driver
     return this.driver.push(items);
+  }
+
+  list (path) {
+    return this.driver.list(path);
   }
 }
 

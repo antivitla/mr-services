@@ -1,6 +1,6 @@
 'use strict';
 
-const Where = require('./where');
+const Where = require('../where');
 
 class MockBackend extends Where {
   constructor () {
